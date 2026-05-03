@@ -1,0 +1,16 @@
+.sidebar { width: 260px; background: #f8f9fa; padding: 15px; display: flex; flex-direction: column; height: 100vh; }
+.logo-container { display: flex; align-items: center; padding: 10px 10px 20px 10px; }
+.drive-logo { width: 30px; margin-right: 10px; }
+.logo-text { font-size: 22px; color: #5f6368; font-weight: 500; }
+.new-btn { background: #fff; color: #3c4043; padding: 12px 24px; border: 1px solid #dadce0; border-radius: 50px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; width: max-content; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3); transition: all 0.2s; margin-bottom: 20px; }
+.new-btn:hover { background: #f8f9fa; box-shadow: 0 1px 3px 1px rgba(60,64,67,0.15); }
+.plus-icon { font-size: 24px; color: #1a73e8; margin-right: 10px; font-weight: 300; }
+.nav-links { list-style: none; }
+.nav-links li { padding: 10px 20px; margin-bottom: 5px; border-radius: 0 25px 25px 0; cursor: pointer; color: #3c4043; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 15px; }
+.nav-links li:hover { background: #f1f3f4; }
+.nav-links li.active { background: #e8f0fe; color: #1a73e8; }
+.storage-section { margin-top: auto; padding: 20px 10px; }
+.storage-title { font-size: 14px; color: #3c4043; margin-bottom: 10px; font-weight: 500; }
+.progress-bar { width: 100%; background: #e0e0e0; height: 6px; border-radius: 5px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 5px; transition: width 0.3s ease; }
+.storage-text { font-size: 13px; color: #5f6368; margin-top: 8px; }
