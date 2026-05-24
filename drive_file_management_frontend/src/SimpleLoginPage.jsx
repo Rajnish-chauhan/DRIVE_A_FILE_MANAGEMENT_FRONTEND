@@ -51,7 +51,7 @@ export default function SimpleLoginPage() {
   return (
     <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', background: '#f0f2f5' }}>
       <div style={{ background: 'white', padding: '40px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', width: '380px', textAlign: 'center' }}>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" alt="Drive Logo" style={{ width: '60px', marginBottom: '15px' }} />
+        <img src="https://cdn-icons-png.flaticon.com/512/414/414825.png" alt="Drive Logo" style={{ width: '60px', marginBottom: '15px' }} />
         <h2 style={{ marginBottom: '25px', color: '#202124' }}>
           {isLogin ? "Log in to Drive" : "Create Account"}
         </h2>

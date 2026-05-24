@@ -1,7 +1,7 @@
 import React from "react";
 import "./FileCard.css";
 
-const FileCard = ({ file, onDownload, onDelete, isTrash }) => {
+const FileCard = ({ file, onDownload, onDelete, isTrash, isSelected, onToggleSelect }) => {
   const getFileIcon = (fileName) => {
     const ext = fileName.split(".").pop().toLowerCase();
     const icons = {
@@ -17,7 +17,25 @@ const FileCard = ({ file, onDownload, onDelete, isTrash }) => {
   };
 
   return (
-    <div className="file-card" onClick={(e) => { if (!e.target.classList.contains("action-btn")) onDownload(file.id); }}>
+    <div 
+      className={`file-card ${isSelected ? 'selected' : ''}`} 
+      onClick={(e) => { 
+        if (!e.target.classList.contains("action-btn") && !e.target.classList.contains("file-checkbox")) {
+          onDownload(file.id); 
+        }
+      }}
+      style={{ position: 'relative' }} // Checkbox ko place karne ke liye
+    >
+      {/* Checkbox Add Kiya Gaya Hai */}
+      <input 
+        type="checkbox" 
+        className="file-checkbox"
+        checked={isSelected}
+        onChange={() => onToggleSelect(file.id)}
+        onClick={(e) => e.stopPropagation()} // Click ko rokne ke liye taaki download trigger na ho
+        style={{ position: 'absolute', top: '10px', left: '10px', cursor: 'pointer', transform: 'scale(1.2)' }}
+      />
+
       <div className="card-top">
         <img src={getFileIcon(file.name)} alt="icon" className="file-icon" />
         <p className="file-name" title={file.name}>{file.name}</p>

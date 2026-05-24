@@ -5,7 +5,7 @@ import "./Sidebar.css";
 function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
   const hiddenFileInput = useRef(null);
   const [storageUsed, setStorageUsed] = useState(0);
-  const MAX_STORAGE = 10 * 1024 * 1024 * 1024; // 10 GB
+  const MAX_STORAGE = 50 * 1024 * 1024 * 1024; // 50 GB
 
   useEffect(() => {
     axios.get("http://localhost:8080/api/files/storage").then((res) => {
@@ -30,7 +30,7 @@ function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
   return (
     <div className="sidebar">
       <div className="logo-container">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" alt="Drive" className="drive-logo" />
+        <img src="https://cdn-icons-png.flaticon.com/512/414/414825.png" alt="Drive" className="drive-logo" />
         <span className="logo-text">Drive</span>
       </div>
 
@@ -51,7 +51,7 @@ function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${storagePercentage}%`, background: storagePercentage > 90 ? '#d93025' : '#1a73e8' }}></div>
         </div>
-        <p className="storage-text">{formatBytes(storageUsed)} of 10 GB used</p>
+        <p className="storage-text">{formatBytes(storageUsed)} of 50 GB used</p>
       </div>
     </div>
   );
