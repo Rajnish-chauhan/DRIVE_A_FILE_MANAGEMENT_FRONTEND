@@ -26,11 +26,10 @@ export default function SimpleLoginPage() {
         // 1. Success Message
         alert("Success: Welcome " + response.data.name + "!");
         
-        // 2. MAIN FIX: Is line se tumhara page Drive par redirect hoga
-        // Agar tumhara Drive ka main page '/' par hai toh ye use karo:
+        // 2. MAIN FIX: page redirect drive
+       
         window.location.href = "/"; 
         
-        // (Agar tum React Router use kar rahe ho, toh navigate("/") bhi use kar sakte ho)
       }
 
     } else {

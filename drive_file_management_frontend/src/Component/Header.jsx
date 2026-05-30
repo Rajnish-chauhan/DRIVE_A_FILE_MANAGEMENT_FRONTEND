@@ -6,7 +6,7 @@ function Header({ onSearch, user }) {
     window.location.href = "http://localhost:8080/logout";
   };
 
-  // Agar user ke paas avatar nahi hai (custom login), toh default icon dikhao
+  //set user avtar if its not have any avtar
   const avatarUrl = user?.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
   return (
     <div className="header">

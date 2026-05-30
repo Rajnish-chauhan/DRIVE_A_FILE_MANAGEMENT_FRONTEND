@@ -4,7 +4,7 @@ import DriveApp from "./DriveApp";
 import SimpleLoginPage from "./SimpleLoginPage";
 axios.defaults.withCredentials = true;
 
-// VERY IMPORTANT: API calls mein cookies bhejney ke liye
+// VERY IMPORTANT: API calls mein cookies send ke liye
 axios.defaults.withCredentials = true;
 
 function App() {

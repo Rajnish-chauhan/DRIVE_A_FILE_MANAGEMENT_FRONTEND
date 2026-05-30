@@ -26,7 +26,7 @@ const FileCard = ({ file, onDownload, onDelete, isTrash, isSelected, onToggleSel
       }}
       style={{ position: 'relative' }} // Checkbox ko place karne ke liye
     >
-      {/* Checkbox Add Kiya Gaya Hai */}
+     {/* check box for file share */}
       <input 
         type="checkbox" 
         className="file-checkbox"
