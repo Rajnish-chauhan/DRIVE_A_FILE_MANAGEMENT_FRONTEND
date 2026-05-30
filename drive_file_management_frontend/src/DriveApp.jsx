@@ -14,7 +14,7 @@ function DriveApp({ user }) {
   // NAYA: Checkbox click pe select hui files ko track karne ke liye
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  
+
   useEffect(() => {
     fetchFiles(currentTab);
     // Tab change hone par selection clear kar do
@@ -88,11 +88,11 @@ function DriveApp({ user }) {
     );
   };
 
-const handleShare = async () => {
+  const handleShare = async () => {
     if (selectedFiles.length === 0) return;
-    
-    setIsSharing(true); 
-    
+
+    setIsSharing(true);
+
     try {
       const fetchPromises = selectedFiles.map(async (fileId) => {
         const fileMeta = files.find(f => f.id === fileId);
@@ -100,14 +100,14 @@ const handleShare = async () => {
 
         // 1. File data fetch 
         const response = await axios.get(`http://localhost:8080/api/files/download/${fileId}`, {
-          responseType: 'blob', 
+          responseType: 'blob',
         });
 
         const mimeType = response.data.type || 'application/octet-stream';
-        return { 
-          id: fileId, 
-          name: fileName, 
-          fileObj: new File([response.data], fileName, { type: mimeType }) 
+        return {
+          id: fileId,
+          name: fileName,
+          fileObj: new File([response.data], fileName, { type: mimeType })
         };
       });
 
@@ -120,7 +120,7 @@ const handleShare = async () => {
           await navigator.share({
             title: 'Shared Files',
             text: `Here are ${fileObjects.length} file(s) for you.`,
-            files: fileObjects, 
+            files: fileObjects,
           });
           console.log("Mobile native share popup opened successfully");
           setSelectedFiles([]);
@@ -133,15 +133,15 @@ const handleShare = async () => {
 
       // 3. PC FALLBACK (Jab direct file share fail ho jaye)
       console.log("PC detected. Generating share links instead of direct files...");
-      
+
       let linkText = `Hey, I am sharing ${fileDataArray.length} file(s) with you:\n\n`;
-      
+
       // Har select ki hui file ka backend se share link generate 
       for (const fd of fileDataArray) {
-         const res = await axios.put(`http://localhost:8080/api/files/generate-share-link/${fd.id}`);
-         const shareToken = res.data;
-         const shareLink = `http://localhost:5173/shared/${shareToken}`;
-         linkText += `- ${fd.name}: ${shareLink}\n`;
+        const res = await axios.put(`http://localhost:8080/api/files/generate-share-link/${fd.id}`);
+        const shareToken = res.data;
+        const shareLink = `http://localhost:5173/shared/${shareToken}`;
+        linkText += `- ${fd.name}: ${shareLink}\n`;
       }
 
       // Link automatically copied
@@ -151,13 +151,13 @@ const handleShare = async () => {
       const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(linkText)}`;
       window.open(whatsappUrl, '_blank');
 
-      setSelectedFiles([]); 
+      setSelectedFiles([]);
 
     } catch (err) {
       console.error("Critical Share Error:", err);
       alert("Files server se laane mein dikkat aayi. Check console.");
     } finally {
-      setIsSharing(false); 
+      setIsSharing(false);
     }
   };
 
@@ -172,24 +172,34 @@ const handleShare = async () => {
         <Header onSearch={setSearchTerm} user={user} />
 
         <div className="content-padding">
+
           {/* Action Bar */}
           {selectedFiles.length > 0 && currentTab !== 'trash' && (
-            <div style={{ background: '#e8f0fe', padding: '10px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div style={{
+              background: '#e8f0fe',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '15px',
+              flexWrap: 'wrap' // NAYA: Ye code buttons ko screen ke bahar jane se rokega
+            }}>
               <span style={{ color: '#1a73e8', fontWeight: '500' }}>{selectedFiles.length} item(s) selected</span>
-              
-              <button 
-                onClick={handleShare} 
+
+              <button
+                onClick={handleShare}
                 disabled={isSharing}
-                style={{ 
-                  background: isSharing ? '#a0c3ff' : '#1a73e8', 
-                  color: 'white', 
-                  border: 'none', 
-                  padding: '8px 16px', 
-                  borderRadius: '4px', 
-                  cursor: isSharing ? 'not-allowed' : 'pointer', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '5px' 
+                style={{
+                  background: isSharing ? '#a0c3ff' : '#1a73e8',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: isSharing ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
                 }}
               >
                 {isSharing ? '⏳ Preparing...' : '🔗 Share File(s)'}
@@ -214,7 +224,7 @@ const handleShare = async () => {
                 <FileCard
                   key={file.id}
                   file={file}
-                  onDownload={() => handleDownload(file)} 
+                  onDownload={() => handleDownload(file)}
                   onDelete={() => handleDelete(file.id, file.name)}
                   isTrash={currentTab === 'trash'}
                   isSelected={selectedFiles.includes(file.id)}

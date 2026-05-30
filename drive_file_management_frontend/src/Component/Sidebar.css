@@ -110,3 +110,35 @@
   color: #5f6368; 
   margin-top: 8px; 
 }
+
+/* ---- NAYA: Mobile Responsiveness ---- */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    padding: 10px 15px;
+    border-bottom: 1px solid #dadce0;
+  }
+  .logo-container {
+    padding: 0 0 10px 0;
+  }
+  .new-btn {
+    width: 100%; /* Button ko full width banayenge */
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+  .nav-links {
+    display: flex;
+    overflow-x: auto; /* Left-Right scroll enable karega */
+    white-space: nowrap; /* Tabs ko niche girne se rokega */
+    padding-bottom: 5px;
+    gap: 10px;
+  }
+  .nav-links li {
+    border-radius: 20px; /* Pill shape */
+    margin-bottom: 0;
+  }
+  .storage-section {
+    display: none; /* Phone par cleaner UI ke liye storage hide kar denge */
+  }
+}
