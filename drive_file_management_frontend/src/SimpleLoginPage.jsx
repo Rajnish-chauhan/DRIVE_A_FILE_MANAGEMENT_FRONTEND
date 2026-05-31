@@ -11,7 +11,7 @@ export default function SimpleLoginPage() {
   const [password, setPassword] = useState('');
 
   const handleOAuthLogin = (provider) => {
-    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
+    window.location.href = `https://drive.backend.rajnishsystems.in/oauth2/authorization/google/${provider}`;
   };
 
   const handleSubmit = async (e) => {
@@ -20,7 +20,7 @@ export default function SimpleLoginPage() {
   try {
     if (isLogin) {
       // LOGIN LOGIC
-      const response = await axios.post("http://localhost:8080/api/auth/login", { email, password });
+      const response = await axios.post("https://drive.backend.rajnishsystems.in/api/auth/login", { email, password });
       
       if (response.status === 200) {
         // 1. Success Message
@@ -34,7 +34,7 @@ export default function SimpleLoginPage() {
 
     } else {
       // SIGNUP LOGIC
-      const response = await axios.post("http://localhost:8080/api/auth/register", { name, email, password });
+      const response = await axios.post("https://drive.backend.rajnishsystems.in/api/auth/register", { name, email, password });
       alert("Success: " + (response.data.message || "Account Created"));
       
       // Signup hone ke baad user ko Login form dikhao
