@@ -23,7 +23,7 @@ function DriveApp({ user }) {
 
   const fetchFiles = async (tab) => {
     try {
-      const res = await axios.get(`http://localhost:8080/api/files/${tab}`);
+      const res = await axios.get(`https://drive.backend.rajnishsystems.in/api/files/${tab}`);
       setFiles(res.data);
     } catch (err) {
       console.error(err);
@@ -34,7 +34,7 @@ function DriveApp({ user }) {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      await axios.post("http://localhost:8080/api/files/upload", formData, {
+      await axios.post("https://drive.backend.rajnishsystems.in/api/files/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       fetchFiles(currentTab);
@@ -45,7 +45,7 @@ function DriveApp({ user }) {
 
   const handleDownload = async (file) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/files/download/${file.id}`, {
+      const response = await axios.get(`https://drive.backend.rajnishsystems.in/api/files/download/${file.id}`, {
         responseType: 'blob', // IMPORTANT: binary data formats handle karne ke liye
       });
 
@@ -70,9 +70,9 @@ function DriveApp({ user }) {
 
     try {
       if (currentTab === 'trash') {
-        await axios.delete(`http://localhost:8080/api/files/delete/${id}`);
+        await axios.delete(`https://drive.backend.rajnishsystems.in/api/files/delete/${id}`);
       } else {
-        await axios.put(`http://localhost:8080/api/files/trash/${id}`);
+        await axios.put(`https://drive.backend.rajnishsystems.in/api/files/trash/${id}`);
       }
       fetchFiles(currentTab);
       setSelectedFiles(selectedFiles.filter(fileId => fileId !== id));
@@ -99,7 +99,7 @@ function DriveApp({ user }) {
         const fileName = fileMeta ? fileMeta.name : `shared_file_${fileId}`;
 
         // 1. File data fetch 
-        const response = await axios.get(`http://localhost:8080/api/files/download/${fileId}`, {
+        const response = await axios.get(`https://drive.backend.rajnishsystems.in/api/files/download/${fileId}`, {
           responseType: 'blob',
         });
 
@@ -138,9 +138,9 @@ function DriveApp({ user }) {
 
       // Har select ki hui file ka backend se share link generate 
       for (const fd of fileDataArray) {
-        const res = await axios.put(`http://localhost:8080/api/files/generate-share-link/${fd.id}`);
+        const res = await axios.put(`https://drive.backend.rajnishsystems.in/api/files/generate-share-link/${fd.id}`);
         const shareToken = res.data;
-        const shareLink = `http://localhost:5173/shared/${shareToken}`;
+        const shareLink = `https://drive.rajnishsystems.in/shared/${shareToken}`;
         linkText += `- ${fd.name}: ${shareLink}\n`;
       }
 
