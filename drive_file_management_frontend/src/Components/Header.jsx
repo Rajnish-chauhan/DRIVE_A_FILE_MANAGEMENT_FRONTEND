@@ -3,7 +3,7 @@ import "./Header.css";
 
 function Header({ onSearch, user }) {
   const handleLogout = () => {
-    window.location.href = "http://localhost:8080/logout";
+    window.location.href = "https://drive.backend.rajnishsystems.in/logout";
   };
 
   //set user avtar if its not have any avtar
