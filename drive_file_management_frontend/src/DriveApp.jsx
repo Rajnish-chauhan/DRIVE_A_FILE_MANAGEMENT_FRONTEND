@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "./component/Sidebar";
-import Header from "./component/Header";
-import FileCard from "./component/FileCard";
+import Sidebar from "./Components/Sidebar";
+import Header from "./Components/Header";
+import FileCard from "./Components/FileCard";
 import "./DriveApp.css";
 import axios from "axios";
 

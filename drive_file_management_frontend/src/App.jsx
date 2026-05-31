@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DriveApp from "./DriveApp";
 import SimpleLoginPage from "./SimpleLoginPage";
-import Footer from "./Component/Footer";
+import Footer from "./Components/Footer";
 
 // VERY IMPORTANT: API calls mein cookies send ke liye
 axios.defaults.withCredentials = true;
