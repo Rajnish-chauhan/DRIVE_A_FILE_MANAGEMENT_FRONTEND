@@ -1,0 +1,56 @@
+.footer {
+  background: #f8f9fa;
+  border-top: 1px solid #dadce0;
+  padding: 20px 15px; /* Thoda padding adjust kiya center look ke liye */
+  width: 100%;
+  margin-top: auto;
+}
+
+.footer-container {
+  display: flex;
+  flex-direction: column; /* Ye dono ko upar-neeche kar dega */
+  align-items: center; /* Center me layega */
+  justify-content: center;
+  gap: 12px; /* Text aur links ke beech ka gap */
+}
+
+.footer-text {
+  margin: 0;
+  font-size: 14px;
+  color: #5f6368;
+  text-align: center;
+}
+
+.footer-main-link {
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.footer-main-link:hover {
+  color: #174ea6;
+  text-decoration: underline;
+}
+
+.footer-links {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-policy-link {
+  color: #5f6368;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-policy-link:hover {
+  color: #202124;
+}
+
+.footer-separator {
+  color: #dadce0;
+}

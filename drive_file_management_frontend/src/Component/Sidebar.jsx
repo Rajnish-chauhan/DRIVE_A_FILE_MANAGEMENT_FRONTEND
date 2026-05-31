@@ -5,7 +5,7 @@ import "./Sidebar.css";
 function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
   const hiddenFileInput = useRef(null);
   const [storageUsed, setStorageUsed] = useState(0);
-  const MAX_STORAGE = 50 * 1024 * 1024 * 1024; // 50 GB
+  const MAX_STORAGE = 2 * 1024 * 1024 * 1024; // 50 GB
 
   useEffect(() => {
     axios.get("http://localhost:8080/api/files/storage").then((res) => {
@@ -51,7 +51,7 @@ function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${storagePercentage}%`, background: storagePercentage > 90 ? '#d93025' : '#1a73e8' }}></div>
         </div>
-        <p className="storage-text">{formatBytes(storageUsed)} of 50 GB used</p>
+        <p className="storage-text">{formatBytes(storageUsed)} of 2 GB used</p>
       </div>
     </div>
   );
