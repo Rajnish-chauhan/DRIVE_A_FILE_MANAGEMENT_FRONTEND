@@ -11,7 +11,7 @@ export default function SimpleLoginPage() {
   const [password, setPassword] = useState('');
 
   const handleOAuthLogin = (provider) => {
-    window.location.href = `https://drive.backend.rajnishsystems.in/oauth2/authorization/google/${provider}`;
+    window.location.href = `https://drive.backend.rajnishsystems.in/oauth2/authorization/${provider}`;
   };
 
   const handleSubmit = async (e) => {
