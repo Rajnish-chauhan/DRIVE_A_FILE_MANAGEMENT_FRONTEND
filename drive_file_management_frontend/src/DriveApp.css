@@ -43,23 +43,22 @@
 }
 
 
-/* ---- NAYA: Mobile Responsiveness ---- */
+/* ----  Mobile Responsiveness ---- */
 @media (max-width: 768px) {
   .main-layout {
-    flex-direction: column; /* Sidebar upar, content niche */
-    height: auto;
+    flex-direction: column; 
     overflow-y: auto; 
   }
   .content-area {
-    border-radius: 0; /* Phone par sharp corners acche lagte hain */
+    border-radius: 0; 
   }
   .content-padding {
-    height: auto; /* Fixed height hatayenge */
+    height: auto; 
     padding: 15px;
     overflow-y: visible;
   }
   .files-grid {
-    /* Phone par 2 files ek line me laane ke liye size thoda chota kiya */
+   
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 12px;
   }
