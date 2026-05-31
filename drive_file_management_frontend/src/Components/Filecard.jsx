@@ -1,5 +1,5 @@
 import React from "react";
-import "./FileCard.css";
+import "./Filecard.css";
 
 const FileCard = ({ file, onDownload, onDelete, isTrash, isSelected, onToggleSelect }) => {
   const getFileIcon = (fileName) => {
