@@ -8,7 +8,7 @@ function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
   const MAX_STORAGE = 2 * 1024 * 1024 * 1024; // 50 GB
 
   useEffect(() => {
-    axios.get("https://drive.backend.rajnishsystems.in/api/files/storage").then((res) => {
+    axios.get("https://drive-file-manager.onrender.com/api/files/storage").then((res) => {
       setStorageUsed(res.data);
     });
   }, [currentTab]);

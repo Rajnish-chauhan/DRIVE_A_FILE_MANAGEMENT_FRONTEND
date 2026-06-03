@@ -12,7 +12,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("https://drive.backend.rajnishsystems.in/api/auth/me")
+    axios.get("https://drive-file-manager.onrender.com/api/auth/me")
       .then(response => {
         setUser(response.data);
         setLoading(false);
