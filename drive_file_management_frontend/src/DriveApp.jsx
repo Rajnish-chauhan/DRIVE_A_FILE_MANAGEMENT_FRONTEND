@@ -10,23 +10,21 @@ function DriveApp({ user }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentTab, setCurrentTab] = useState("home");
   const [isSharing, setIsSharing] = useState(false);
-
-  // NAYA: Checkbox click pe select hui files ko track karne ke liye
   const [selectedFiles, setSelectedFiles] = useState([]);
-
 
   useEffect(() => {
     fetchFiles(currentTab);
-    // Tab change hone par selection clear kar do
     setSelectedFiles([]);
   }, [currentTab]);
 
   const fetchFiles = async (tab) => {
     try {
-      const res = await axios.get(`https://drive-file-manager.onrender.com/api/files/${tab}`);
+      const res = await axios.get(`https://drive-file-manager.onrender.com/api/files/${tab}`, {
+        withCredentials: true 
+      });
       setFiles(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch Error:", err);
     }
   };
 
@@ -36,17 +34,22 @@ function DriveApp({ user }) {
     try {
       await axios.post("https://drive-file-manager.onrender.com/api/files/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        // CRITICAL FIX: Ensures the backend knows WHO is uploading
+        withCredentials: true 
       });
       fetchFiles(currentTab);
     } catch (error) {
-      alert("Upload failed.");
+      console.error("Upload Error:", error);
+      // CRITICAL FIX: Displays the exact error from Spring Boot
+      alert(error.response?.data || "Upload failed. Check the console for details.");
     }
   };
 
   const handleDownload = async (file) => {
     try {
       const response = await axios.get(`https://drive-file-manager.onrender.com/api/files/download/${file.id}`, {
-        responseType: 'blob', // IMPORTANT: binary data formats handle karne ke liye
+        responseType: 'blob',
+        withCredentials: true
       });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -55,7 +58,7 @@ function DriveApp({ user }) {
       link.setAttribute('download', file.name);
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link); // memory cleanup
+      link.parentNode.removeChild(link);
     } catch (error) {
       console.error("Download Error:", error);
       alert("Download failed! Ye purani file ho sakti hai. Ek nayi file upload karke check karo.");
@@ -70,9 +73,9 @@ function DriveApp({ user }) {
 
     try {
       if (currentTab === 'trash') {
-        await axios.delete(`https://drive-file-manager.onrender.com/api/files/delete/${id}`);
+        await axios.delete(`https://drive-file-manager.onrender.com/api/files/delete/${id}`, { withCredentials: true });
       } else {
-        await axios.put(`https://drive-file-manager.onrender.com/api/files/trash/${id}`);
+        await axios.put(`https://drive-file-manager.onrender.com/api/files/trash/${id}`, {}, { withCredentials: true });
       }
       fetchFiles(currentTab);
       setSelectedFiles(selectedFiles.filter(fileId => fileId !== id));
@@ -90,7 +93,6 @@ function DriveApp({ user }) {
 
   const handleShare = async () => {
     if (selectedFiles.length === 0) return;
-
     setIsSharing(true);
 
     try {
@@ -98,9 +100,9 @@ function DriveApp({ user }) {
         const fileMeta = files.find(f => f.id === fileId);
         const fileName = fileMeta ? fileMeta.name : `shared_file_${fileId}`;
 
-        // 1. File data fetch 
         const response = await axios.get(`https://drive-file-manager.onrender.com/api/files/download/${fileId}`, {
           responseType: 'blob',
+          withCredentials: true
         });
 
         const mimeType = response.data.type || 'application/octet-stream';
@@ -114,7 +116,6 @@ function DriveApp({ user }) {
       const fileDataArray = await Promise.all(fetchPromises);
       const fileObjects = fileDataArray.map(fd => fd.fileObj);
 
-      // 2. Pehle check agar Mobile/Native File Share support karta hai
       if (navigator.canShare && navigator.canShare({ files: fileObjects })) {
         try {
           await navigator.share({
@@ -122,35 +123,26 @@ function DriveApp({ user }) {
             text: `Here are ${fileObjects.length} file(s) for you.`,
             files: fileObjects,
           });
-          console.log("Mobile native share popup opened successfully");
           setSelectedFiles([]);
           setIsSharing(false);
-          return; // Agar native share chal gaya, toh yahi ruk jao
+          return; 
         } catch (error) {
-          console.log("Native share failed or was cancelled. Triggering PC fallback...");
+          console.log("Native share failed. Triggering PC fallback...");
         }
       }
 
-      // 3. PC FALLBACK (Jab direct file share fail ho jaye)
-      console.log("PC detected. Generating share links instead of direct files...");
-
       let linkText = `Hey, I am sharing ${fileDataArray.length} file(s) with you:\n\n`;
 
-      // Har select ki hui file ka backend se share link generate 
       for (const fd of fileDataArray) {
-        const res = await axios.put(`https://drive-file-manager.onrender.com/api/files/generate-share-link/${fd.id}`);
+        const res = await axios.put(`https://drive-file-manager.onrender.com/api/files/generate-share-link/${fd.id}`, {}, { withCredentials: true });
         const shareToken = res.data;
         const shareLink = `https://drive.rajnishsystems.in/shared/${shareToken}`;
         linkText += `- ${fd.name}: ${shareLink}\n`;
       }
 
-      // Link automatically copied
       navigator.clipboard.writeText(linkText);
-
-      // open whatsapp
       const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(linkText)}`;
       window.open(whatsappUrl, '_blank');
-
       setSelectedFiles([]);
 
     } catch (err) {
@@ -172,34 +164,19 @@ function DriveApp({ user }) {
         <Header onSearch={setSearchTerm} user={user} />
 
         <div className="content-padding">
-
-          {/* Action Bar */}
           {selectedFiles.length > 0 && currentTab !== 'trash' && (
             <div style={{
-              background: '#e8f0fe',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              marginBottom: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
-              flexWrap: 'wrap' // NAYA: Ye code buttons ko screen ke bahar jane se rokega
+              background: '#e8f0fe', padding: '10px 20px', borderRadius: '8px',
+              marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap'
             }}>
               <span style={{ color: '#1a73e8', fontWeight: '500' }}>{selectedFiles.length} item(s) selected</span>
 
               <button
-                onClick={handleShare}
-                disabled={isSharing}
+                onClick={handleShare} disabled={isSharing}
                 style={{
-                  background: isSharing ? '#a0c3ff' : '#1a73e8',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  cursor: isSharing ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px'
+                  background: isSharing ? '#a0c3ff' : '#1a73e8', color: 'white', border: 'none',
+                  padding: '8px 16px', borderRadius: '4px', cursor: isSharing ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '5px'
                 }}
               >
                 {isSharing ? '⏳ Preparing...' : '🔗 Share File(s)'}
