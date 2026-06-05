@@ -26,7 +26,7 @@ function DriveApp({ user }) {
       
       let fetchedData = res.data;
 
-      if (tab === 'recent') {
+      if (tab === 'recent' || tab === 'recents') {
         fetchedData = fetchedData.sort((a, b) => {
           const dateA = new Date(a.createdAt || a.uploadDate || a.updatedAt || 0);
           const dateB = new Date(b.createdAt || b.uploadDate || b.updatedAt || 0);
@@ -259,9 +259,11 @@ function DriveApp({ user }) {
             ) : (
               <div className="empty-state generic-empty">
                 <img className="empty-img-small" src="https://ssl.gstatic.com/docs/doclist/images/empty_state_details_v2.svg" alt="No Files" />
+                
+                {/* ---- FIX: Handles both 'recent', 'recents', 'share', 'shared' safely ---- */}
                 <h3 className="empty-title" style={{ fontSize: '20px' }}>
                   {currentTab === 'trash' ? 'Trash is empty' : 
-                   currentTab === 'recent' ? 'No recent files found' : 
+                   currentTab.includes('recent') ? 'No recent files found' : 
                    'No shared files found'}
                 </h3>
               </div>
