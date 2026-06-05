@@ -1,0 +1,173 @@
+/* ---- Main Container ---- */
+.login-container {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  background: #f0f2f5;
+}
+
+/* ---- Login Card ---- */
+.login-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  width: 380px;
+  text-align: center;
+}
+
+.login-logo {
+  width: 60px;
+  margin-bottom: 15px;
+}
+
+.login-title {
+  margin-bottom: 25px;
+  color: #202124;
+}
+
+/* ---- Form & Inputs ---- */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.login-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #dadce0;
+  outline: none;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.login-input:focus {
+  border-color: #1a73e8;
+}
+
+/* ---- Password Visibility Toggle ---- */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input {
+  padding-right: 40px; /* Space for the eye icon */
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #5f6368;
+  transition: color 0.2s;
+}
+
+.password-toggle-icon:hover {
+  color: #202124;
+}
+
+/* ---- Buttons ---- */
+.btn-submit {
+  background: #1a73e8;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 5px;
+  font-size: 15px;
+  transition: background 0.2s;
+}
+
+.btn-submit:hover {
+  background: #1557b0;
+}
+
+/* ---- Footer Text ---- */
+.toggle-text {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #5f6368;
+}
+
+.toggle-link {
+  color: #1a73e8;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.toggle-link:hover {
+  text-decoration: underline;
+}
+
+/* ---- Divider ---- */
+.divider-container {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider-text {
+  padding: 0 10px;
+  color: #5f6368;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* ---- OAuth Buttons ---- */
+.oauth-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-oauth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.btn-oauth:hover {
+  opacity: 0.9;
+}
+
+.btn-google {
+  background: white;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+}
+
+.btn-github {
+  background: #24292e;
+  color: white;
+  border: none;
+}
+
+.oauth-icon {
+  width: 20px;
+}
+
+.oauth-icon.github-icon {
+  filter: invert(1);
+}
