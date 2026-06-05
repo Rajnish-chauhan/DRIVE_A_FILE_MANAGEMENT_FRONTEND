@@ -9,6 +9,9 @@ export default function SimpleLoginPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
+  // --- NEW: State for Password Visibility ---
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleOAuthLogin = (provider) => {
     window.location.href = `https://drive-file-manager.onrender.com/oauth2/authorization/${provider}`;
@@ -17,16 +20,26 @@ export default function SimpleLoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault(); 
 
+    // FRONTEND CHECK: Block disposable fake emails
+    const fakeDomains = [
+      "mailinator.com", "10minutemail.com", "guerrillamail.com", 
+      "tempmail.com", "yopmail.com", "dropmail.me"
+    ];
+    
+    const emailDomain = email.split('@')[1]; 
+    
+    if (fakeDomains.includes(emailDomain)) {
+      alert("Please use a real email address (Gmail, Outlook, Yahoo, etc).");
+      return; 
+    }
+
     try {
       if (isLogin) {
         // LOGIN LOGIC
         const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/login", { email, password });
         
         if (response.status === 200) {
-          // 1. Success Message
           alert("Success: Welcome " + response.data.name + "!");
-          
-          // 2. MAIN FIX: page redirect drive
           window.location.href = "/"; 
         }
 
@@ -62,7 +75,7 @@ export default function SimpleLoginPage() {
               onChange={(e) => setName(e.target.value)} 
               required 
               autoComplete="off"
-              style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} 
+              style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none', boxSizing: 'border-box' }} 
             />
           )}
           
@@ -73,20 +86,59 @@ export default function SimpleLoginPage() {
             onChange={(e) => setEmail(e.target.value)} 
             required 
             autoComplete="off" 
-            style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} 
+            style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none', boxSizing: 'border-box' }} 
           />
           
-          <input 
-            type="password" 
-            placeholder="Password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            required 
-            autoComplete="new-password" 
-            style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} 
-          />
-          
-          <button type="submit" style={{ background: '#1a73e8', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+          {/* --- NEW: Password Input with Eye Icon --- */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input 
+              type={showPassword ? "text" : "password"} // Toggles text/password
+              placeholder="Password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              required 
+              autoComplete="new-password" 
+              style={{ 
+                width: '100%', 
+                padding: '12px', 
+                paddingRight: '40px', // Extra space so text doesn't hide behind the icon
+                borderRadius: '8px', 
+                border: '1px solid #dadce0', 
+                outline: 'none', 
+                boxSizing: 'border-box' 
+              }} 
+            />
+            
+            <div 
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ 
+                position: 'absolute', 
+                right: '12px', 
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                color: '#5f6368'
+              }}
+              title={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                // Eye Slash Icon (Hide)
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              ) : (
+                // Eye Open Icon (Show)
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              )}
+            </div>
+          </div>
+          {/* --------------------------------------- */}
+
+          <button type="submit" style={{ background: '#1a73e8', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', marginTop: '5px' }}>
             {isLogin ? "Sign In" : "Sign Up"}
           </button>
         </form>
