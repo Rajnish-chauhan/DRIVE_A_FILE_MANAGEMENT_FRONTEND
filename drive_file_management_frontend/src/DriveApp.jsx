@@ -44,7 +44,6 @@ function DriveApp({ user }) {
     }
   };
 
-  // --- DRAG AND DROP LOGIC ---
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -52,7 +51,6 @@ function DriveApp({ user }) {
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    // Safety check so the drag box doesn't flicker wildly
     if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
       setIsDragging(false);
     }
@@ -64,12 +62,11 @@ function DriveApp({ user }) {
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       Array.from(e.dataTransfer.files).forEach((file) => {
-        handleUploadFromSidebar(file); // Reuses your working upload logic
+        handleUploadFromSidebar(file);
       });
     }
   };
 
-  // --- FILE ACTION LOGIC ---
   const handleDownload = async (file) => {
     try {
       const response = await axios.get(`https://drive-file-manager.onrender.com/api/files/download/${file.id}`, {
@@ -189,7 +186,6 @@ function DriveApp({ user }) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* DRAG AND DROP VISUAL BOX */}
       {isDragging && (
         <div style={{
           position: "fixed", 
@@ -241,10 +237,34 @@ function DriveApp({ user }) {
 
           <h2 className="tab-title">{currentTab === 'home' ? 'My Drive' : currentTab}</h2>
 
+          {/* ----- NEW EMPTY STATE UPLOAD UI ----- */}
           {filteredFiles.length === 0 ? (
-            <div className="empty-state">
-              <img src="https://ssl.gstatic.com/docs/doclist/images/empty_state_my_drive_v2.svg" alt="No Files" style={{ width: "250px" }} />
-              <p>Not Found</p>
+            <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px', textAlign: 'center' }}>
+              <img src="https://ssl.gstatic.com/docs/doclist/images/empty_state_my_drive_v2.svg" alt="No Files" style={{ width: "250px", marginBottom: "20px" }} />
+              <h3 style={{ color: '#202124', fontWeight: '400', fontSize: '22px', marginBottom: '8px' }}>
+                A place for all of your files
+              </h3>
+              <p style={{ color: '#5f6368', fontSize: '15px' }}>
+                Drag and drop files here, or click "New" to upload.
+              </p>
+              
+              <label style={{ 
+                marginTop: '25px', background: '#1a73e8', color: 'white', padding: '10px 24px', 
+                borderRadius: '24px', cursor: 'pointer', fontWeight: '500', fontSize: '14px',
+                boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)'
+              }}>
+                Upload File
+                <input 
+                  type="file" 
+                  multiple 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      Array.from(e.target.files).forEach(file => handleUploadFromSidebar(file));
+                    }
+                  }} 
+                />
+              </label>
             </div>
           ) : (
             <div className="files-grid">
