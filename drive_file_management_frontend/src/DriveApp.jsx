@@ -127,12 +127,15 @@ function DriveApp({ user }) {
     );
   };
 
-  const handleShare = async () => {
+const handleShare = async () => {
     if (selectedFiles.length === 0) return;
     setIsSharing(true);
 
     try {
-      const fetchPromises = selectedFiles.map(async (fileId) => {
+      const fileObjects = [];
+      
+      // 1. Fetch the actual file data from the server
+      for (const fileId of selectedFiles) {
         const fileMeta = files.find(f => f.id === fileId);
         const fileName = fileMeta ? fileMeta.name : `shared_file_${fileId}`;
 
@@ -141,49 +144,49 @@ function DriveApp({ user }) {
           withCredentials: true
         });
 
+        // CRITICAL FIX FOR PHONES: Phones will block the share menu if the file type is unknown.
+        // We force 'application/octet-stream' if the server doesn't provide a valid type.
         const mimeType = response.data.type || 'application/octet-stream';
-        return {
-          id: fileId,
-          name: fileName,
-          fileObj: new File([response.data], fileName, { type: mimeType })
-        };
-      });
+        const fileObj = new File([response.data], fileName, { type: mimeType });
+        fileObjects.push(fileObj);
+      }
 
-      const fileDataArray = await Promise.all(fetchPromises);
-      const fileObjects = fileDataArray.map(fd => fd.fileObj);
-
+      // 2. Try Mobile Native Sharing (Actual File)
       if (navigator.canShare && navigator.canShare({ files: fileObjects })) {
         try {
           await navigator.share({
-            title: 'Shared Files',
-            text: `Here are ${fileObjects.length} file(s) for you.`,
+            title: 'Sharing Files',
             files: fileObjects,
           });
           setSelectedFiles([]);
           setIsSharing(false);
-          return; 
+          return; // Success! Exit the function.
         } catch (error) {
-          console.log("Native share failed. Triggering PC fallback...");
+          console.log("User cancelled share or native share failed:", error);
         }
-      }
+      } 
 
-      let linkText = `Hey, I am sharing ${fileDataArray.length} file(s) with you:\n\n`;
+      // 3. Fallback for Laptops/Unsupported Desktop Browsers (Actual File)
+      // Since PC browsers cannot push physical files directly into WhatsApp, 
+      // the only way to give them the "actual file" is to download it.
+      alert("Your device doesn't support direct app file sharing. The file(s) will be downloaded so you can send them manually.");
+      
+      fileObjects.forEach(fileObj => {
+        const url = window.URL.createObjectURL(fileObj);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileObj.name);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+        window.URL.revokeObjectURL(url); // Clean up memory
+      });
 
-      for (const fd of fileDataArray) {
-        const res = await axios.put(`https://drive-file-manager.onrender.com/api/files/generate-share-link/${fd.id}`, {}, { withCredentials: true });
-        const shareToken = res.data;
-        const shareLink = `https://drive.rajnishsystems.in/shared/${shareToken}`;
-        linkText += `- ${fd.name}: ${shareLink}\n`;
-      }
-
-      navigator.clipboard.writeText(linkText);
-      const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(linkText)}`;
-      window.open(whatsappUrl, '_blank');
       setSelectedFiles([]);
 
     } catch (err) {
       console.error("Critical Share Error:", err);
-      alert("Files server se laane mein dikkat aayi. Check console.");
+      alert("Failed to download the file from the server. Please check your connection.");
     } finally {
       setIsSharing(false);
     }
