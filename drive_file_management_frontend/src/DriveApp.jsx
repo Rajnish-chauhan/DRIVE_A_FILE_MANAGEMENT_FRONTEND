@@ -126,24 +126,18 @@ function DriveApp({ user }) {
       prev.includes(id) ? prev.filter((fileId) => fileId !== id) : [...prev, id]
     );
   };
-
 const handleShare = async () => {
     if (selectedFiles.length === 0) return;
     setIsSharing(true);
 
-    // --- NEW: Helper to force the correct file type for Android/iOS ---
+    // Helper: Phones will outright reject the file if it doesn't know the exact format
     const getMimeType = (filename) => {
       const ext = filename.split('.').pop().toLowerCase();
       const types = {
-        'png': 'image/png',
-        'jpg': 'image/jpeg',
-        'jpeg': 'image/jpeg',
-        'pdf': 'application/pdf',
-        'txt': 'text/plain',
-        'mp4': 'video/mp4',
-        'zip': 'application/zip',
-        'csv': 'text/csv',
-        'doc': 'application/msword'
+        'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
+        'pdf': 'application/pdf', 'txt': 'text/plain', 'mp4': 'video/mp4',
+        'zip': 'application/zip', 'csv': 'text/csv', 'doc': 'application/msword',
+        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       };
       return types[ext] || 'application/octet-stream';
     };
@@ -151,6 +145,7 @@ const handleShare = async () => {
     try {
       const fileObjects = [];
       
+      // 1. Fetch files from the server
       for (const fileId of selectedFiles) {
         const fileMeta = files.find(f => f.id === fileId);
         const fileName = fileMeta ? fileMeta.name : `shared_file_${fileId}`;
@@ -160,34 +155,37 @@ const handleShare = async () => {
           withCredentials: true
         });
 
-        // FIX: Check if backend sent an unknown type, and if so, guess it from the extension
-        let mimeType = response.data.type;
-        if (!mimeType || mimeType === 'application/octet-stream' || mimeType === '') {
-          mimeType = getMimeType(fileName);
-        }
-
+        const mimeType = getMimeType(fileName); // Force strict MIME type
         const fileObj = new File([response.data], fileName, { type: mimeType });
         fileObjects.push(fileObj);
       }
 
-      // --- ATTEMPT NATIVE MOBILE SHARE ---
+      // 2. ATTEMPT MOBILE NATIVE SHARE
       if (navigator.canShare && navigator.canShare({ files: fileObjects })) {
         try {
           await navigator.share({
-            title: 'Shared Files',
+            title: 'Shared from My Drive',
             files: fileObjects,
           });
           setSelectedFiles([]);
           setIsSharing(false);
-          return; // Success! Exit the function.
+          return; // Success! The phone's share menu opened.
         } catch (error) {
-          console.log("User cancelled share or native share failed:", error);
+          console.warn("Native share aborted by user or blocked by browser timeout:", error);
+          // If it fails here, it falls through to the download code below
         }
       } 
 
-      // --- DESKTOP FALLBACK (Or if Mobile still rejects it) ---
-      alert("Your browser blocked direct app sharing. The file(s) will be downloaded so you can send them manually.");
+      // 3. FALLBACK: IF LAPTOP, OR IF PHONE BLOCKED IT
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      if (isMobile) {
+          alert("Your phone's security blocked the share menu (the file took too long to fetch). It will be downloaded to your phone so you can share it manually.");
+      } else {
+          alert("Laptops/PCs do not allow websites to push files into apps. The file will be downloaded to your computer.");
+      }
       
+      // Force download the physical file
       fileObjects.forEach(fileObj => {
         const url = window.URL.createObjectURL(fileObj);
         const link = document.createElement('a');
@@ -196,19 +194,18 @@ const handleShare = async () => {
         document.body.appendChild(link);
         link.click();
         link.parentNode.removeChild(link);
-        window.URL.revokeObjectURL(url); 
+        window.URL.revokeObjectURL(url); // Clean up memory
       });
 
       setSelectedFiles([]);
 
     } catch (err) {
       console.error("Critical Share Error:", err);
-      alert("Failed to download the file from the server. Please check your connection.");
+      alert("Failed to prepare the file for sharing.");
     } finally {
       setIsSharing(false);
     }
   };
-
     
 
   const filteredFiles = files.filter((file) =>
