@@ -1,3 +1,4 @@
+/* ---- Main Layout ---- */
 .main-layout { 
   display: flex; 
   height: 100vh; 
@@ -10,6 +11,7 @@
   flex-direction: column; 
   background: #fff; 
   border-radius: 15px 0 0 0; 
+  height: 100%; /* Extracted from JS */
 }
 
 .content-padding { 
@@ -26,24 +28,145 @@
   font-weight: 400; 
 }
 
+/* ---- Action Bar (Selection & Sharing) ---- */
+.selection-action-bar {
+  background: #e8f0fe; 
+  padding: 10px 20px; 
+  border-radius: 8px;
+  margin-bottom: 20px; 
+  display: flex; 
+  align-items: center; 
+  gap: 15px; 
+  flex-wrap: wrap;
+}
+
+.selection-text {
+  color: #1a73e8; 
+  font-weight: 500;
+}
+
+.btn-share {
+  background: #1a73e8; 
+  color: white; 
+  border: none;
+  padding: 8px 16px; 
+  border-radius: 4px; 
+  cursor: pointer;
+  display: flex; 
+  align-items: center; 
+  gap: 5px;
+}
+
+.btn-share:disabled {
+  background: #a0c3ff; 
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background: transparent; 
+  border: 1px solid #1a73e8; 
+  color: #1a73e8;
+  padding: 8px 16px; 
+  border-radius: 4px; 
+  cursor: pointer;
+}
+
+/* ---- Grid & Drag/Drop Overlay ---- */
+.grid-wrapper {
+  position: relative; 
+  min-height: 300px;
+}
+
 .files-grid { 
   display: grid; 
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
   gap: 20px; 
 }
 
+.drag-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(26, 115, 232, 0.15);
+  border: 4px dashed #1a73e8;
+  border-radius: 16px;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #1a73e8;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.drag-overlay.grid-overlay {
+  top: -10px; left: -10px; right: -10px; bottom: -10px;
+  background-color: rgba(26, 115, 232, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(2px);
+}
+
+/* ---- Empty States ---- */
 .empty-state { 
   display: flex; 
   flex-direction: column; 
   align-items: center; 
-  justify-content: center; 
-  height: 60%; 
-  color: #5f6368; 
-  font-size: 16px; 
+  text-align: center;
 }
 
+.empty-state.home-empty {
+  margin-top: 50px;
+  position: relative; 
+  padding: 40px;      
+  border-radius: 16px; 
+}
 
-/* ----  Mobile Responsiveness ---- */
+.empty-state.generic-empty {
+  margin-top: 80px;
+}
+
+.empty-img-large { 
+  width: 250px; 
+  margin-bottom: 20px; 
+}
+
+.empty-img-small { 
+  width: 180px; 
+  margin-bottom: 20px; 
+  opacity: 0.8; 
+}
+
+.empty-title { 
+  color: #e8eaed; 
+  font-weight: 400; 
+  font-size: 22px; 
+  margin-bottom: 8px; 
+}
+
+.empty-subtitle { 
+  color: #9aa0a6; 
+  font-size: 15px; 
+}
+
+/* ---- Upload Button ---- */
+.btn-upload-label {
+  margin-top: 25px; 
+  background: #1a73e8; 
+  color: white; 
+  padding: 10px 24px; 
+  border-radius: 24px; 
+  cursor: pointer; 
+  font-weight: 500; 
+  font-size: 14px;
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+}
+
+.hidden-input {
+  display: none;
+}
+
+/* ---- Mobile Responsiveness ---- */
 @media (max-width: 768px) {
   .main-layout {
     flex-direction: column; 
@@ -58,7 +181,6 @@
     overflow-y: visible;
   }
   .files-grid {
-   
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 12px;
   }
