@@ -11,6 +11,7 @@ function DriveApp({ user }) {
   const [currentTab, setCurrentTab] = useState("home");
   const [isSharing, setIsSharing] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     fetchFiles(currentTab);
@@ -34,14 +35,35 @@ function DriveApp({ user }) {
     try {
       await axios.post("https://drive-file-manager.onrender.com/api/files/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-        // CRITICAL FIX: Ensures the backend knows WHO is uploading
         withCredentials: true 
       });
       fetchFiles(currentTab);
     } catch (error) {
       console.error("Upload Error:", error);
-      // CRITICAL FIX: Displays the exact error from Spring Boot
       alert(error.response?.data || "Upload failed. Check the console for details.");
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      Array.from(e.dataTransfer.files).forEach((file) => {
+        handleUploadFromSidebar(file);
+      });
     }
   };
 
@@ -158,7 +180,32 @@ function DriveApp({ user }) {
   );
 
   return (
-    <div className="main-layout">
+    <div 
+      className="main-layout"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      style={{ position: "relative" }}
+    >
+      {isDragging && (
+        <div style={{
+          position: "absolute",
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(26, 115, 232, 0.1)",
+          border: "3px dashed #1a73e8",
+          zIndex: 9999,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: "28px",
+          fontWeight: "bold",
+          color: "#1a73e8",
+          backdropFilter: "blur(2px)"
+        }}>
+          Drop files here to upload
+        </div>
+      )}
+
       <Sidebar onFileSelect={handleUploadFromSidebar} currentTab={currentTab} setCurrentTab={setCurrentTab} />
       <div className="content-area">
         <Header onSearch={setSearchTerm} user={user} />
