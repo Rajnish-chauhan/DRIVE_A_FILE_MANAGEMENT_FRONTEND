@@ -23,7 +23,20 @@ function DriveApp({ user }) {
       const res = await axios.get(`https://drive-file-manager.onrender.com/api/files/${tab}`, {
         withCredentials: true 
       });
-      setFiles(res.data);
+      
+      let fetchedData = res.data;
+
+      // --- FIX: Ensure 'Recent' tab sorts newest files to the top ---
+      if (tab === 'recent') {
+        fetchedData = fetchedData.sort((a, b) => {
+          // Checks common date fields. Update 'createdAt' if your Spring Boot uses a different name like 'uploadDate'
+          const dateA = new Date(a.createdAt || a.uploadDate || a.updatedAt || 0);
+          const dateB = new Date(b.createdAt || b.uploadDate || b.updatedAt || 0);
+          return dateB - dateA; // Descending order (Newest first)
+        });
+      }
+
+      setFiles(fetchedData);
     } catch (err) {
       console.error("Fetch Error:", err);
     }
@@ -46,7 +59,7 @@ function DriveApp({ user }) {
 
   // --- DRAG AND DROP LOGIC ---
   const handleDragOver = (e) => {
-    if (currentTab !== 'home') return; // Blocks dragging in Trash/Recent/Shared
+    if (currentTab !== 'home') return; 
     e.preventDefault();
     setIsDragging(true);
   };
@@ -60,7 +73,7 @@ function DriveApp({ user }) {
   };
 
   const handleDrop = (e) => {
-    if (currentTab !== 'home') return; // Blocks dropping in Trash/Recent/Shared
+    if (currentTab !== 'home') return; 
     e.preventDefault();
     setIsDragging(false);
 
@@ -221,11 +234,13 @@ function DriveApp({ user }) {
             </div>
           )}
 
-          <h2 className="tab-title">{currentTab === 'home' ? 'My Drive' : currentTab}</h2>
+          {/* ----- FIX: Renamed My Drive to Home, and Capitalizes other tabs natively ----- */}
+          <h2 className="tab-title">
+            {currentTab === 'home' ? 'Home' : currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}
+          </h2>
 
           {filteredFiles.length === 0 ? (
             currentTab === 'home' ? (
-              /* ----- FANCY UPLOAD STATE (ONLY FOR HOME) ----- */
               <div 
                 className="empty-state" 
                 style={{ 
@@ -285,9 +300,7 @@ function DriveApp({ user }) {
                 </label>
               </div>
             ) : (
-              /* ----- SIMPLE EMPTY STATE (FOR TRASH, RECENT, SHARED) ----- */
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '80px', textAlign: 'center' }}>
-                {/* Replaced image with a slightly different, more generic empty state folder icon */}
                 <img src="https://ssl.gstatic.com/docs/doclist/images/empty_state_details_v2.svg" alt="No Files" style={{ width: "180px", marginBottom: "20px", opacity: 0.8 }} />
                 <h3 style={{ color: '#e8eaed', fontWeight: '400', fontSize: '20px' }}>
                   {currentTab === 'trash' ? 'Trash is empty' : 
@@ -297,7 +310,6 @@ function DriveApp({ user }) {
               </div>
             )
           ) : (
-            /* ----- GRID WHEN FILES EXIST ----- */
             <div style={{ position: 'relative', minHeight: '300px' }}>
               
               {isDragging && currentTab === 'home' && (
