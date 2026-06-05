@@ -35,11 +35,13 @@ function DriveApp({ user }) {
     try {
       await axios.post("https://drive-file-manager.onrender.com/api/files/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        // CRITICAL FIX: Ensures the backend knows WHO is uploading
         withCredentials: true 
       });
       fetchFiles(currentTab);
     } catch (error) {
       console.error("Upload Error:", error);
+      // CRITICAL FIX: Displays the exact error from Spring Boot
       alert(error.response?.data || "Upload failed. Check the console for details.");
     }
   };
