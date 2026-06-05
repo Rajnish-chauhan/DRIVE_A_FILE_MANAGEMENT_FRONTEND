@@ -44,6 +44,7 @@ function DriveApp({ user }) {
     }
   };
 
+  // --- DRAG AND DROP LOGIC ---
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -51,7 +52,7 @@ function DriveApp({ user }) {
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    // CRITICAL FIX: Safe check prevents React from crashing if the mouse leaves the browser window
+    // Safety check so the drag box doesn't flicker wildly
     if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
       setIsDragging(false);
     }
@@ -63,11 +64,12 @@ function DriveApp({ user }) {
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       Array.from(e.dataTransfer.files).forEach((file) => {
-        handleUploadFromSidebar(file);
+        handleUploadFromSidebar(file); // Reuses your working upload logic
       });
     }
   };
 
+  // --- FILE ACTION LOGIC ---
   const handleDownload = async (file) => {
     try {
       const response = await axios.get(`https://drive-file-manager.onrender.com/api/files/download/${file.id}`, {
@@ -186,11 +188,11 @@ function DriveApp({ user }) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      /* Removed the position: relative inline style that was breaking your CSS */
     >
+      {/* DRAG AND DROP VISUAL BOX */}
       {isDragging && (
         <div style={{
-          position: "fixed", /* Changed to fixed so it floats harmlessly over everything */
+          position: "fixed", 
           top: 0, left: 0, width: "100vw", height: "100vh",
           backgroundColor: "rgba(26, 115, 232, 0.1)",
           border: "4px dashed #1a73e8",
@@ -202,7 +204,7 @@ function DriveApp({ user }) {
           fontWeight: "bold",
           color: "#1a73e8",
           backdropFilter: "blur(2px)",
-          pointerEvents: "none" /* Crucial: Stops the overlay from blocking background clicks/events */
+          pointerEvents: "none" 
         }}>
           Drop files here to upload
         </div>

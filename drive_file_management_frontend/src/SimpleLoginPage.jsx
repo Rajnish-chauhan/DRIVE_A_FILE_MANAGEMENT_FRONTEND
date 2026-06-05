@@ -15,37 +15,35 @@ export default function SimpleLoginPage() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault(); 
+    e.preventDefault(); 
 
-  try {
-    if (isLogin) {
-      // LOGIN LOGIC
-      const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/login", { email, password });
-      
-      if (response.status === 200) {
-        // 1. Success Message
-        alert("Success: Welcome " + response.data.name + "!");
+    try {
+      if (isLogin) {
+        // LOGIN LOGIC
+        const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/login", { email, password });
         
-        // 2. MAIN FIX: page redirect drive
-       
-        window.location.href = "/"; 
+        if (response.status === 200) {
+          // 1. Success Message
+          alert("Success: Welcome " + response.data.name + "!");
+          
+          // 2. MAIN FIX: page redirect drive
+          window.location.href = "/"; 
+        }
+
+      } else {
+        // SIGNUP LOGIC
+        const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/register", { name, email, password });
+        alert("Success: " + (response.data.message || "Account Created"));
         
+        // Signup hone ke baad user ko Login form dikhao
+        setIsLogin(true);
+        setPassword('');
       }
-
-    } else {
-      // SIGNUP LOGIC
-      const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/register", { name, email, password });
-      alert("Success: " + (response.data.message || "Account Created"));
-      
-      // Signup hone ke baad user ko Login form dikhao
-      setIsLogin(true);
-      setPassword('');
+    } catch (error) {
+      console.error("Backend Error:", error);
+      alert("Error: " + (error.response?.data?.message || "Invalid Credentials"));
     }
-  } catch (error) {
-    console.error("Backend Error:", error);
-    alert("Error: " + (error.response?.data?.message || "Invalid Credentials"));
-  }
-};
+  };
 
   return (
     <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', background: '#f0f2f5' }}>
@@ -57,10 +55,37 @@ export default function SimpleLoginPage() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {!isLogin && (
-            <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} required style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} />
+            <input 
+              type="text" 
+              placeholder="Full Name" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              required 
+              autoComplete="off"
+              style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} 
+            />
           )}
-          <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} />
+          
+          <input 
+            type="email" 
+            placeholder="Email Address" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            required 
+            autoComplete="off" 
+            style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} 
+          />
+          
+          <input 
+            type="password" 
+            placeholder="Password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            required 
+            autoComplete="new-password" 
+            style={{ padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} 
+          />
+          
           <button type="submit" style={{ background: '#1a73e8', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
             {isLogin ? "Sign In" : "Sign Up"}
           </button>
