@@ -52,7 +52,6 @@ function DriveApp({ user }) {
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    // Safety check so the drag box doesn't flicker wildly
     if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
       setIsDragging(false);
     }
@@ -64,12 +63,11 @@ function DriveApp({ user }) {
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       Array.from(e.dataTransfer.files).forEach((file) => {
-        handleUploadFromSidebar(file); // Reuses your working upload logic
+        handleUploadFromSidebar(file); 
       });
     }
   };
 
-  // --- FILE ACTION LOGIC ---
   const handleDownload = async (file) => {
     try {
       const response = await axios.get(`https://drive-file-manager.onrender.com/api/files/download/${file.id}`, {
@@ -184,42 +182,15 @@ function DriveApp({ user }) {
 
   return (
     <div className="main-layout">
-      
       <Sidebar onFileSelect={handleUploadFromSidebar} currentTab={currentTab} setCurrentTab={setCurrentTab} />
       
-      {/* MOVED THE DRAG EVENTS HERE! 
-        Now it only listens when you drag over the actual file area.
-        Added position: relative so the absolute overlay stays perfectly inside this box.
-      */}
       <div 
         className="content-area"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        style={{ position: "relative", height: "100%" }} 
+        style={{ height: "100%" }} 
       >
-        
-        {/* UPDATED DRAG AND DROP VISUAL BOX */}
-        {isDragging && (
-          <div style={{
-            position: "absolute", // Changed from fixed to absolute
-            top: 0, left: 0, right: 0, bottom: 0, // Snaps to the edges of content-area
-            backgroundColor: "rgba(26, 115, 232, 0.1)",
-            border: "4px dashed #1a73e8",
-            zIndex: 9999,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: "28px",
-            fontWeight: "bold",
-            color: "#1a73e8",
-            backdropFilter: "blur(2px)",
-            pointerEvents: "none" 
-          }}>
-            Drop files here to upload
-          </div>
-        )}
-
         <Header onSearch={setSearchTerm} user={user} />
 
         <div className="content-padding">
@@ -249,10 +220,42 @@ function DriveApp({ user }) {
 
           <h2 className="tab-title">{currentTab === 'home' ? 'My Drive' : currentTab}</h2>
 
+          {/* ----- SMALL DRAG & DROP BOX OVER EMPTY STATE ----- */}
           {filteredFiles.length === 0 ? (
-            <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px', textAlign: 'center' }}>
+            <div 
+              className="empty-state" 
+              style={{ 
+                display: 'flex', flexDirection: 'column', alignItems: 'center', 
+                marginTop: '50px', textAlign: 'center', 
+                position: 'relative', // Keeps the overlay contained inside this box
+                padding: '40px',      // Gives the dotted box some breathing room
+                borderRadius: '16px' 
+              }}
+            >
+              
+              {/* This overlay now ONLY covers the Cat Image & Text */}
+              {isDragging && (
+                <div style={{
+                  position: "absolute",
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundColor: "rgba(26, 115, 232, 0.15)",
+                  border: "4px dashed #1a73e8",
+                  borderRadius: "16px",
+                  zIndex: 9999,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontSize: "24px",
+                  fontWeight: "bold",
+                  color: "#1a73e8",
+                  backdropFilter: "blur(4px)",
+                  pointerEvents: "none" 
+                }}>
+                  Drop files here to upload
+                </div>
+              )}
+
               <img src="https://ssl.gstatic.com/docs/doclist/images/empty_state_my_drive_v2.svg" alt="No Files" style={{ width: "250px", marginBottom: "20px" }} />
-              {/* Changed text color slightly to look better on your dark theme based on the screenshot */}
               <h3 style={{ color: '#e8eaed', fontWeight: '400', fontSize: '22px', marginBottom: '8px' }}>
                 A place for all of your files
               </h3>
@@ -279,18 +282,43 @@ function DriveApp({ user }) {
               </label>
             </div>
           ) : (
-            <div className="files-grid">
-              {filteredFiles.map((file) => (
-                <FileCard
-                  key={file.id}
-                  file={file}
-                  onDownload={() => handleDownload(file)}
-                  onDelete={() => handleDelete(file.id, file.name)}
-                  isTrash={currentTab === 'trash'}
-                  isSelected={selectedFiles.includes(file.id)}
-                  onToggleSelect={handleToggleSelect}
-                />
-              ))}
+            /* ----- IF FILES EXIST, OVERLAY COVERS THE GRID INSTEAD ----- */
+            <div style={{ position: 'relative', minHeight: '300px' }}>
+              
+              {isDragging && (
+                <div style={{
+                  position: "absolute",
+                  top: -10, left: -10, right: -10, bottom: -10,
+                  backgroundColor: "rgba(26, 115, 232, 0.1)",
+                  border: "4px dashed #1a73e8",
+                  borderRadius: "12px",
+                  zIndex: 9999,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontSize: "24px",
+                  fontWeight: "bold",
+                  color: "#1a73e8",
+                  backdropFilter: "blur(2px)",
+                  pointerEvents: "none" 
+                }}>
+                  Drop files here to upload
+                </div>
+              )}
+
+              <div className="files-grid">
+                {filteredFiles.map((file) => (
+                  <FileCard
+                    key={file.id}
+                    file={file}
+                    onDownload={() => handleDownload(file)}
+                    onDelete={() => handleDelete(file.id, file.name)}
+                    isTrash={currentTab === 'trash'}
+                    isSelected={selectedFiles.includes(file.id)}
+                    onToggleSelect={handleToggleSelect}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
