@@ -44,6 +44,7 @@ function DriveApp({ user }) {
     }
   };
 
+  // --- DRAG AND DROP LOGIC ---
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -51,6 +52,7 @@ function DriveApp({ user }) {
 
   const handleDragLeave = (e) => {
     e.preventDefault();
+    // Safety check so the drag box doesn't flicker wildly
     if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
       setIsDragging(false);
     }
@@ -62,11 +64,12 @@ function DriveApp({ user }) {
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       Array.from(e.dataTransfer.files).forEach((file) => {
-        handleUploadFromSidebar(file);
+        handleUploadFromSidebar(file); // Reuses your working upload logic
       });
     }
   };
 
+  // --- FILE ACTION LOGIC ---
   const handleDownload = async (file) => {
     try {
       const response = await axios.get(`https://drive-file-manager.onrender.com/api/files/download/${file.id}`, {
@@ -180,34 +183,43 @@ function DriveApp({ user }) {
   );
 
   return (
-    <div 
-      className="main-layout"
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      {isDragging && (
-        <div style={{
-          position: "fixed", 
-          top: 0, left: 0, width: "100vw", height: "100vh",
-          backgroundColor: "rgba(26, 115, 232, 0.1)",
-          border: "4px dashed #1a73e8",
-          zIndex: 9999,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "28px",
-          fontWeight: "bold",
-          color: "#1a73e8",
-          backdropFilter: "blur(2px)",
-          pointerEvents: "none" 
-        }}>
-          Drop files here to upload
-        </div>
-      )}
-
+    <div className="main-layout">
+      
       <Sidebar onFileSelect={handleUploadFromSidebar} currentTab={currentTab} setCurrentTab={setCurrentTab} />
-      <div className="content-area">
+      
+      {/* MOVED THE DRAG EVENTS HERE! 
+        Now it only listens when you drag over the actual file area.
+        Added position: relative so the absolute overlay stays perfectly inside this box.
+      */}
+      <div 
+        className="content-area"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        style={{ position: "relative", height: "100%" }} 
+      >
+        
+        {/* UPDATED DRAG AND DROP VISUAL BOX */}
+        {isDragging && (
+          <div style={{
+            position: "absolute", // Changed from fixed to absolute
+            top: 0, left: 0, right: 0, bottom: 0, // Snaps to the edges of content-area
+            backgroundColor: "rgba(26, 115, 232, 0.1)",
+            border: "4px dashed #1a73e8",
+            zIndex: 9999,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: "28px",
+            fontWeight: "bold",
+            color: "#1a73e8",
+            backdropFilter: "blur(2px)",
+            pointerEvents: "none" 
+          }}>
+            Drop files here to upload
+          </div>
+        )}
+
         <Header onSearch={setSearchTerm} user={user} />
 
         <div className="content-padding">
@@ -237,14 +249,14 @@ function DriveApp({ user }) {
 
           <h2 className="tab-title">{currentTab === 'home' ? 'My Drive' : currentTab}</h2>
 
-          {/* ----- NEW EMPTY STATE UPLOAD UI ----- */}
           {filteredFiles.length === 0 ? (
             <div className="empty-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px', textAlign: 'center' }}>
               <img src="https://ssl.gstatic.com/docs/doclist/images/empty_state_my_drive_v2.svg" alt="No Files" style={{ width: "250px", marginBottom: "20px" }} />
-              <h3 style={{ color: '#202124', fontWeight: '400', fontSize: '22px', marginBottom: '8px' }}>
+              {/* Changed text color slightly to look better on your dark theme based on the screenshot */}
+              <h3 style={{ color: '#e8eaed', fontWeight: '400', fontSize: '22px', marginBottom: '8px' }}>
                 A place for all of your files
               </h3>
-              <p style={{ color: '#5f6368', fontSize: '15px' }}>
+              <p style={{ color: '#9aa0a6', fontSize: '15px' }}>
                 Drag and drop files here, or click "New" to upload.
               </p>
               
