@@ -46,11 +46,13 @@ function DriveApp({ user }) {
 
   // --- DRAG AND DROP LOGIC ---
   const handleDragOver = (e) => {
+    if (currentTab !== 'home') return; // Blocks dragging in Trash/Recent/Shared
     e.preventDefault();
     setIsDragging(true);
   };
 
   const handleDragLeave = (e) => {
+    if (currentTab !== 'home') return;
     e.preventDefault();
     if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
       setIsDragging(false);
@@ -58,6 +60,7 @@ function DriveApp({ user }) {
   };
 
   const handleDrop = (e) => {
+    if (currentTab !== 'home') return; // Blocks dropping in Trash/Recent/Shared
     e.preventDefault();
     setIsDragging(false);
 
@@ -220,72 +223,84 @@ function DriveApp({ user }) {
 
           <h2 className="tab-title">{currentTab === 'home' ? 'My Drive' : currentTab}</h2>
 
-          {/* ----- SMALL DRAG & DROP BOX OVER EMPTY STATE ----- */}
           {filteredFiles.length === 0 ? (
-            <div 
-              className="empty-state" 
-              style={{ 
-                display: 'flex', flexDirection: 'column', alignItems: 'center', 
-                marginTop: '50px', textAlign: 'center', 
-                position: 'relative', // Keeps the overlay contained inside this box
-                padding: '40px',      // Gives the dotted box some breathing room
-                borderRadius: '16px' 
-              }}
-            >
-              
-              {/* This overlay now ONLY covers the Cat Image & Text */}
-              {isDragging && (
-                <div style={{
-                  position: "absolute",
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundColor: "rgba(26, 115, 232, 0.15)",
-                  border: "4px dashed #1a73e8",
-                  borderRadius: "16px",
-                  zIndex: 9999,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontSize: "24px",
-                  fontWeight: "bold",
-                  color: "#1a73e8",
-                  backdropFilter: "blur(4px)",
-                  pointerEvents: "none" 
-                }}>
-                  Drop files here to upload
-                </div>
-              )}
+            currentTab === 'home' ? (
+              /* ----- FANCY UPLOAD STATE (ONLY FOR HOME) ----- */
+              <div 
+                className="empty-state" 
+                style={{ 
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', 
+                  marginTop: '50px', textAlign: 'center', 
+                  position: 'relative', 
+                  padding: '40px',      
+                  borderRadius: '16px' 
+                }}
+              >
+                
+                {isDragging && (
+                  <div style={{
+                    position: "absolute",
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: "rgba(26, 115, 232, 0.15)",
+                    border: "4px dashed #1a73e8",
+                    borderRadius: "16px",
+                    zIndex: 9999,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontSize: "24px",
+                    fontWeight: "bold",
+                    color: "#1a73e8",
+                    backdropFilter: "blur(4px)",
+                    pointerEvents: "none" 
+                  }}>
+                    Drop files here to upload
+                  </div>
+                )}
 
-              <img src="https://ssl.gstatic.com/docs/doclist/images/empty_state_my_drive_v2.svg" alt="No Files" style={{ width: "250px", marginBottom: "20px" }} />
-              <h3 style={{ color: '#e8eaed', fontWeight: '400', fontSize: '22px', marginBottom: '8px' }}>
-                A place for all of your files
-              </h3>
-              <p style={{ color: '#9aa0a6', fontSize: '15px' }}>
-                Drag and drop files here, or click "New" to upload.
-              </p>
-              
-              <label style={{ 
-                marginTop: '25px', background: '#1a73e8', color: 'white', padding: '10px 24px', 
-                borderRadius: '24px', cursor: 'pointer', fontWeight: '500', fontSize: '14px',
-                boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)'
-              }}>
-                Upload File
-                <input 
-                  type="file" 
-                  multiple 
-                  style={{ display: 'none' }} 
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      Array.from(e.target.files).forEach(file => handleUploadFromSidebar(file));
-                    }
-                  }} 
-                />
-              </label>
-            </div>
+                <img src="https://ssl.gstatic.com/docs/doclist/images/empty_state_my_drive_v2.svg" alt="No Files" style={{ width: "250px", marginBottom: "20px" }} />
+                <h3 style={{ color: '#e8eaed', fontWeight: '400', fontSize: '22px', marginBottom: '8px' }}>
+                  A place for all of your files
+                </h3>
+                <p style={{ color: '#9aa0a6', fontSize: '15px' }}>
+                  Drag and drop files here, or click "New" to upload.
+                </p>
+                
+                <label style={{ 
+                  marginTop: '25px', background: '#1a73e8', color: 'white', padding: '10px 24px', 
+                  borderRadius: '24px', cursor: 'pointer', fontWeight: '500', fontSize: '14px',
+                  boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)'
+                }}>
+                  Upload File
+                  <input 
+                    type="file" 
+                    multiple 
+                    style={{ display: 'none' }} 
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        Array.from(e.target.files).forEach(file => handleUploadFromSidebar(file));
+                      }
+                    }} 
+                  />
+                </label>
+              </div>
+            ) : (
+              /* ----- SIMPLE EMPTY STATE (FOR TRASH, RECENT, SHARED) ----- */
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '80px', textAlign: 'center' }}>
+                {/* Replaced image with a slightly different, more generic empty state folder icon */}
+                <img src="https://ssl.gstatic.com/docs/doclist/images/empty_state_details_v2.svg" alt="No Files" style={{ width: "180px", marginBottom: "20px", opacity: 0.8 }} />
+                <h3 style={{ color: '#e8eaed', fontWeight: '400', fontSize: '20px' }}>
+                  {currentTab === 'trash' ? 'Trash is empty' : 
+                   currentTab === 'recent' ? 'No recent files found' : 
+                   'No shared files found'}
+                </h3>
+              </div>
+            )
           ) : (
-            /* ----- IF FILES EXIST, OVERLAY COVERS THE GRID INSTEAD ----- */
+            /* ----- GRID WHEN FILES EXIST ----- */
             <div style={{ position: 'relative', minHeight: '300px' }}>
               
-              {isDragging && (
+              {isDragging && currentTab === 'home' && (
                 <div style={{
                   position: "absolute",
                   top: -10, left: -10, right: -10, bottom: -10,
