@@ -131,10 +131,26 @@ const handleShare = async () => {
     if (selectedFiles.length === 0) return;
     setIsSharing(true);
 
+    // --- NEW: Helper to force the correct file type for Android/iOS ---
+    const getMimeType = (filename) => {
+      const ext = filename.split('.').pop().toLowerCase();
+      const types = {
+        'png': 'image/png',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'pdf': 'application/pdf',
+        'txt': 'text/plain',
+        'mp4': 'video/mp4',
+        'zip': 'application/zip',
+        'csv': 'text/csv',
+        'doc': 'application/msword'
+      };
+      return types[ext] || 'application/octet-stream';
+    };
+
     try {
       const fileObjects = [];
       
-      // 1. Fetch the actual file data from the server
       for (const fileId of selectedFiles) {
         const fileMeta = files.find(f => f.id === fileId);
         const fileName = fileMeta ? fileMeta.name : `shared_file_${fileId}`;
@@ -144,18 +160,21 @@ const handleShare = async () => {
           withCredentials: true
         });
 
-        // CRITICAL FIX FOR PHONES: Phones will block the share menu if the file type is unknown.
-        // We force 'application/octet-stream' if the server doesn't provide a valid type.
-        const mimeType = response.data.type || 'application/octet-stream';
+        // FIX: Check if backend sent an unknown type, and if so, guess it from the extension
+        let mimeType = response.data.type;
+        if (!mimeType || mimeType === 'application/octet-stream' || mimeType === '') {
+          mimeType = getMimeType(fileName);
+        }
+
         const fileObj = new File([response.data], fileName, { type: mimeType });
         fileObjects.push(fileObj);
       }
 
-      // 2. Try Mobile Native Sharing (Actual File)
+      // --- ATTEMPT NATIVE MOBILE SHARE ---
       if (navigator.canShare && navigator.canShare({ files: fileObjects })) {
         try {
           await navigator.share({
-            title: 'Sharing Files',
+            title: 'Shared Files',
             files: fileObjects,
           });
           setSelectedFiles([]);
@@ -166,10 +185,8 @@ const handleShare = async () => {
         }
       } 
 
-      // 3. Fallback for Laptops/Unsupported Desktop Browsers (Actual File)
-      // Since PC browsers cannot push physical files directly into WhatsApp, 
-      // the only way to give them the "actual file" is to download it.
-      alert("Your device doesn't support direct app file sharing. The file(s) will be downloaded so you can send them manually.");
+      // --- DESKTOP FALLBACK (Or if Mobile still rejects it) ---
+      alert("Your browser blocked direct app sharing. The file(s) will be downloaded so you can send them manually.");
       
       fileObjects.forEach(fileObj => {
         const url = window.URL.createObjectURL(fileObj);
@@ -179,7 +196,7 @@ const handleShare = async () => {
         document.body.appendChild(link);
         link.click();
         link.parentNode.removeChild(link);
-        window.URL.revokeObjectURL(url); // Clean up memory
+        window.URL.revokeObjectURL(url); 
       });
 
       setSelectedFiles([]);
@@ -191,6 +208,8 @@ const handleShare = async () => {
       setIsSharing(false);
     }
   };
+
+    
 
   const filteredFiles = files.filter((file) =>
     file.name.toLowerCase().includes(searchTerm.toLowerCase())
