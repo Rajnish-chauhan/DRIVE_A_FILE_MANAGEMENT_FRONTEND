@@ -1,217 +1,652 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import './SimpleLoginPage.css';
+import React, { useState, useEffect } from "react";
 
-axios.defaults.withCredentials = true;
+import Sidebar from "./Components/Sidebar";
 
-export default function SimpleLoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  
-  // NAYA: State to control showing the OTP screen and storing the OTP
-  const [showOtpScreen, setShowOtpScreen] = useState(false);
-  const [otp, setOtp] = useState('');
+import Header from "./Components/Header";
 
-  const handleOAuthLogin = (provider) => {
-    window.location.href = `https://drive-file-manager.onrender.com/oauth2/authorization/${provider}`;
-  };
+import FileCard from "./Components/Filecard";
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); 
+import "./DriveApp.css";
 
-    const fakeDomains = [
-      "mailinator.com", "10minutemail.com", "guerrillamail.com", 
-      "tempmail.com", "yopmail.com", "dropmail.me"
-    ];
-    
-    const emailDomain = email.split('@')[1]; 
-    
-    if (fakeDomains.includes(emailDomain)) {
-      alert("Please use a real email address (Gmail, Outlook, Yahoo, etc).");
-      return; 
-    }
+import axios from "axios";
+
+
+
+function DriveApp({ user }) {
+
+  const [files, setFiles] = useState([]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentTab, setCurrentTab] = useState("home");
+
+  const [isSharing, setIsSharing] = useState(false);
+
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  const [isDragging, setIsDragging] = useState(false);
+
+
+
+  useEffect(() => {
+
+    fetchFiles(currentTab);
+
+    setSelectedFiles([]);
+
+  }, [currentTab]);
+
+
+
+  const fetchFiles = async (tab) => {
 
     try {
-      if (isLogin) {
-        // LOGIN LOGIC
-        const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/login", { email, password });
-        
-        if (response.status === 200) {
-          alert("Success: Welcome " + response.data.name + "!");
-          window.location.href = "/"; 
-        }
+
+      const res = await axios.get(`http://localhost:8080/api/files/${tab}`, {
+
+        withCredentials: true
+
+      });
+
+     
+
+      let fetchedData = res.data;
+
+
+
+      if (tab === 'recent' || tab === 'recents') {
+
+        fetchedData = fetchedData.sort((a, b) => {
+
+          const dateA = new Date(a.createdAt || a.uploadDate || a.updatedAt || 0);
+
+          const dateB = new Date(b.createdAt || b.uploadDate || b.updatedAt || 0);
+
+          return dateB - dateA;
+
+        });
+
+      }
+
+
+
+      setFiles(fetchedData);
+
+    } catch (err) {
+
+      console.error("Fetch Error:", err);
+
+    }
+
+  };
+
+
+
+  const handleUploadFromSidebar = async (file) => {
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    try {
+
+      await axios.post("http://localhost:8080/api/files/upload", formData, {
+
+        headers: { "Content-Type": "multipart/form-data" },
+
+        withCredentials: true
+
+      });
+
+      fetchFiles(currentTab);
+
+    } catch (error) {
+
+      console.error("Upload Error:", error);
+
+      alert(error.response?.data || "Upload failed. Check the console for details.");
+
+    }
+
+  };
+
+
+
+  const handleDragOver = (e) => {
+
+    if (currentTab !== 'home') return;
+
+    e.preventDefault();
+
+    setIsDragging(true);
+
+  };
+
+
+
+  const handleDragLeave = (e) => {
+
+    if (currentTab !== 'home') return;
+
+    e.preventDefault();
+
+    if (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget)) {
+
+      setIsDragging(false);
+
+    }
+
+  };
+
+
+
+  const handleDrop = (e) => {
+
+    if (currentTab !== 'home') return;
+
+    e.preventDefault();
+
+    setIsDragging(false);
+
+
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+
+      Array.from(e.dataTransfer.files).forEach((file) => {
+
+        handleUploadFromSidebar(file);
+
+      });
+
+    }
+
+  };
+
+
+
+  const handleDownload = async (file) => {
+
+    try {
+
+      const response = await axios.get(`http://localhost:8080/api/files/download/${file.id}`, {
+
+        responseType: 'blob',
+
+        withCredentials: true
+
+      });
+
+
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      const link = document.createElement('a');
+
+      link.href = url;
+
+      link.setAttribute('download', file.name);
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.parentNode.removeChild(link);
+
+    } catch (error) {
+
+      console.error("Download Error:", error);
+
+      alert("Download failed! Ye purani file ho sakti hai. Ek nayi file upload karke check karo.");
+
+    }
+
+  };
+
+
+
+  const handleDelete = async (id, fileName) => {
+
+    const confirmed = window.confirm(
+
+      currentTab === 'trash' ? `Delete "${fileName}" permanently?` : `Move "${fileName}" to Trash?`
+
+    );
+
+    if (!confirmed) return;
+
+
+
+    try {
+
+      if (currentTab === 'trash') {
+
+        await axios.delete(
+
+          `http://localhost:8080/api/files/delete/${id}`,
+
+          { withCredentials: true });
 
       } else {
-        // SIGNUP LOGIC
-        const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/register", { name, email, password });
-        alert("Success: " + (response.data.message || "Account Created. Check your email for the OTP!"));
-        
-        // NAYA: Instead of going to login, show the OTP screen!
-        setShowOtpScreen(true);
+
+        await axios.put(
+
+          `http://localhost:8080/api/files/trash/${id}`
+
+          , {}, { withCredentials: true });
+
       }
+
+      fetchFiles(currentTab);
+
+      setSelectedFiles(selectedFiles.filter(fileId => fileId !== id));
+
     } catch (error) {
-      console.error("Backend Error:", error);
-      alert("Error: " + (error.response?.data?.message || "Invalid Credentials"));
+
+      console.error("Delete Error:", error);
+
+      alert("Delete failed! Console check karo.");
+
     }
+
   };
 
-  // NAYA: Function to handle OTP Submission
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/verify-otp", { 
-        email: email, 
-        otp: otp 
-      });
-      
-      alert("Success: " + response.data.message);
-      
-      // Reset everything and send them to the normal Login screen
-      setShowOtpScreen(false);
-      setIsLogin(true);
-      setPassword('');
-      setOtp('');
-      
-    } catch (error) {
-      console.error("OTP Error:", error);
-      alert("Error: " + (error.response?.data?.message || "Invalid OTP"));
-    }
+
+
+  const handleToggleSelect = (id) => {
+
+    setSelectedFiles((prev) =>
+
+      prev.includes(id) ? prev.filter((fileId) => fileId !== id) : [...prev, id]
+
+    );
+
   };
+
+const handleShare = async () => {
+
+    if (selectedFiles.length === 0) return;
+
+    setIsSharing(true);
+
+
+
+    // Helper: Phones will outright reject the file if it doesn't know the exact format
+
+    const getMimeType = (filename) => {
+
+      const ext = filename.split('.').pop().toLowerCase();
+
+      const types = {
+
+        'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
+
+        'pdf': 'application/pdf', 'txt': 'text/plain', 'mp4': 'video/mp4',
+
+        'zip': 'application/zip', 'csv': 'text/csv', 'doc': 'application/msword',
+
+        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+      };
+
+      return types[ext] || 'application/octet-stream';
+
+    };
+
+
+
+    try {
+
+      const fileObjects = [];
+
+     
+
+      // 1. Fetch files from the server
+
+      for (const fileId of selectedFiles) {
+
+        const fileMeta = files.find(f => f.id === fileId);
+
+        const fileName = fileMeta ? fileMeta.name : `shared_file_${fileId}`;
+
+
+
+        const response = await axios.get(
+
+          `http://localhost:8080/api/files/download/${fileId}`
+
+          , {
+
+          responseType: 'blob',
+
+          withCredentials: true
+
+        });
+
+
+
+        const mimeType = getMimeType(fileName); // Force strict MIME type
+
+        const fileObj = new File([response.data], fileName, { type: mimeType });
+
+        fileObjects.push(fileObj);
+
+      }
+
+
+
+      // 2. ATTEMPT MOBILE NATIVE SHARE
+
+      if (navigator.canShare && navigator.canShare({ files: fileObjects })) {
+
+        try {
+
+          await navigator.share({
+
+            title: 'Shared from My Drive',
+
+            files: fileObjects,
+
+          });
+
+          setSelectedFiles([]);
+
+          setIsSharing(false);
+
+          return; // Success! The phone's share menu opened.
+
+        } catch (error) {
+
+          console.warn("Native share aborted by user or blocked by browser timeout:", error);
+
+          // If it fails here, it falls through to the download code below
+
+        }
+
+      }
+
+
+
+      // 3. FALLBACK: IF LAPTOP, OR IF PHONE BLOCKED IT
+
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+
+
+      if (isMobile) {
+
+          alert("Your phone's security blocked the share menu (the file took too long to fetch). It will be downloaded to your phone so you can share it manually.");
+
+      } else {
+
+          alert("Laptops/PCs do not allow websites to push files into apps. The file will be downloaded to your computer.");
+
+      }
+
+     
+
+      // Force download the physical file
+
+      fileObjects.forEach(fileObj => {
+
+        const url = window.URL.createObjectURL(fileObj);
+
+        const link = document.createElement('a');
+
+        link.href = url;
+
+        link.setAttribute('download', fileObj.name);
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.parentNode.removeChild(link);
+
+        window.URL.revokeObjectURL(url); // Clean up memory
+
+      });
+
+
+
+      setSelectedFiles([]);
+
+
+
+    } catch (err) {
+
+      console.error("Critical Share Error:", err);
+
+      alert("Failed to prepare the file for sharing.");
+
+    } finally {
+
+      setIsSharing(false);
+
+    }
+
+  };
+
+   
+
+
+
+  const filteredFiles = files.filter((file) =>
+
+    file.name.toLowerCase().includes(searchTerm.toLowerCase())
+
+  );
+
+
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <img 
-          src="https://cdn-icons-png.flaticon.com/512/414/414825.png" 
-          alt="Drive Logo" 
-          className="login-logo" 
-        />
 
-        {/* NAYA: Conditional rendering. If showOtpScreen is true, ONLY show the OTP form */}
-        {showOtpScreen ? (
-          <>
-            <h2 className="login-title">Verify Your Email</h2>
-            <p className="toggle-text" style={{marginBottom: '20px'}}>
-              We sent a 6-digit code to <b>{email}</b>
-            </p>
-            
-            <form onSubmit={handleVerifyOtp} className="login-form">
-              <input 
-                type="text" 
-                placeholder="Enter 6-digit OTP" 
-                value={otp} 
-                onChange={(e) => setOtp(e.target.value)} 
-                required 
-                maxLength="6"
-                className="login-input" 
-                style={{textAlign: 'center', letterSpacing: '5px', fontSize: '18px'}}
-              />
-              <button type="submit" className="btn-submit">
-                Verify & Continue
+    <div className="main-layout">
+
+      <Sidebar onFileSelect={handleUploadFromSidebar} currentTab={currentTab} setCurrentTab={setCurrentTab} />
+
+     
+
+      <div
+
+        className="content-area"
+
+        onDragOver={handleDragOver}
+
+        onDragLeave={handleDragLeave}
+
+        onDrop={handleDrop}
+
+      >
+
+        <Header onSearch={setSearchTerm} user={user} />
+
+
+
+        <div className="content-padding">
+
+          {selectedFiles.length > 0 && currentTab !== 'trash' && (
+
+            <div className="selection-action-bar">
+
+              <span className="selection-text">{selectedFiles.length} item(s) selected</span>
+
+
+
+              <button
+
+                className="btn-share"
+
+                onClick={handleShare}
+
+                disabled={isSharing}
+
+              >
+
+                {isSharing ? '⏳ Preparing...' : '🔗 Share File(s)'}
+
               </button>
-            </form>
-            
-            <p className="toggle-text" style={{marginTop: '15px'}}>
-              <span onClick={() => setShowOtpScreen(false)} className="toggle-link">
-                ← Back to Sign Up
-              </span>
-            </p>
-          </>
-        ) : (
-          // THIS IS YOUR EXISTING LOGIN/REGISTER UI
-          <>
-            <h2 className="login-title">
-              {isLogin ? "Log in to Drive" : "Create Account"}
-            </h2>
 
-            <form onSubmit={handleSubmit} className="login-form">
-              {!isLogin && (
-                <input 
-                  type="text" 
-                  placeholder="Full Name" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  required 
-                  autoComplete="off"
-                  className="login-input" 
-                />
-              )}
-              
-              <input 
-                type="email" 
-                placeholder="Email Address" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
-                autoComplete="off" 
-                className="login-input" 
-              />
-              
-              <div className="password-wrapper">
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="Password" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  required 
-                  autoComplete="new-password" 
-                  className="login-input password-input" 
-                />
-                
-                <div 
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle-icon"
-                  title={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                      <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                  ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  )}
-                </div>
+
+
+              <button className="btn-cancel" onClick={() => setSelectedFiles([])}>
+
+                Cancel
+
+              </button>
+
+            </div>
+
+          )}
+
+
+
+          <h2 className="tab-title">
+
+            {currentTab === 'home' ? 'Home' : currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}
+
+          </h2>
+
+
+
+          {filteredFiles.length === 0 ? (
+
+            currentTab === 'home' ? (
+
+              <div className="empty-state home-empty">
+
+               
+
+                {isDragging && (
+
+                  <div className="drag-overlay">
+
+                    Drop files here to upload
+
+                  </div>
+
+                )}
+
+
+
+                <img className="empty-img-large" src="https://ssl.gstatic.com/docs/doclist/images/empty_state_my_drive_v2.svg" alt="No Files" />
+
+                <h3 className="empty-title">A place for all of your files</h3>
+
+                <p className="empty-subtitle">Drag and drop files here, or click "New" to upload.</p>
+
+               
+
+                <label className="btn-upload-label">
+
+                  Upload File
+
+                  <input
+
+                    type="file"
+
+                    multiple
+
+                    className="hidden-input"
+
+                    onChange={(e) => {
+
+                      if (e.target.files && e.target.files.length > 0) {
+
+                        Array.from(e.target.files).forEach(file => handleUploadFromSidebar(file));
+
+                      }
+
+                    }}
+
+                  />
+
+                </label>
+
               </div>
 
-              <button type="submit" className="btn-submit">
-                {isLogin ? "Sign In" : "Sign Up"}
-              </button>
-            </form>
+            ) : (
 
-            <p className="toggle-text">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <span onClick={() => setIsLogin(!isLogin)} className="toggle-link">
-                {isLogin ? "Sign up" : "Log in"}
-              </span>
-            </p>
+              <div className="empty-state generic-empty">
 
-            <div className="divider-container">
-              <div className="divider-line"></div>
-              <span className="divider-text">OR</span>
-              <div className="divider-line"></div>
+                <img className="empty-img-small" src="https://ssl.gstatic.com/docs/doclist/images/empty_state_details_v2.svg" alt="No Files" />
+
+               
+
+                {/* ---- FIX: Handles both 'recent', 'recents', 'share', 'shared' safely ---- */}
+
+                <h3 className="empty-title" style={{ fontSize: '20px' }}>
+
+                  {currentTab === 'trash' ? 'Trash is empty' :
+
+                   currentTab.includes('recent') ? 'No recent files found' :
+
+                   'No shared files found'}
+
+                </h3>
+
+              </div>
+
+            )
+
+          ) : (
+
+            <div className="grid-wrapper">
+
+             
+
+              {isDragging && currentTab === 'home' && (
+
+                <div className="drag-overlay grid-overlay">
+
+                  Drop files here to upload
+
+                </div>
+
+              )}
+
+
+
+              <div className="files-grid">
+
+                {filteredFiles.map((file) => (
+
+                  <FileCard
+
+                    key={file.id}
+
+                    file={file}
+
+                    onDownload={() => handleDownload(file)}
+
+                    onDelete={() => handleDelete(file.id, file.name)}
+
+                    isTrash={currentTab === 'trash'}
+
+                    isSelected={selectedFiles.includes(file.id)}
+
+                    onToggleSelect={handleToggleSelect}
+
+                  />
+
+                ))}
+
+              </div>
+
             </div>
 
-            <div className="oauth-container">
-              <button type="button" onClick={() => handleOAuthLogin('google')} className="btn-oauth btn-google">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="oauth-icon" /> 
-                Continue with Google
-              </button>
-              
-              <button type="button" onClick={() => handleOAuthLogin('github')} className="btn-oauth btn-github">
-                <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" className="oauth-icon github-icon" /> 
-                Continue with GitHub
-              </button>
-            </div>
-          </>
-        )}
+          )}
+
+        </div>
+
       </div>
+
     </div>
+
   );
+
 }
+
+
+
+export default DriveApp; 
+
