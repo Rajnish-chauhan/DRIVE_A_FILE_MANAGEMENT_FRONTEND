@@ -20,7 +20,7 @@ function DriveApp({ user }) {
 
   const fetchFiles = async (tab) => {
     try {
-      const res = await axios.get(`https://drive-file-manager.onrender.com/api/files/${tab}`, {
+      const res = await axios.get(`http://localhost:8080/api/files/${tab}`, {
         withCredentials: true 
       });
       
@@ -44,7 +44,7 @@ function DriveApp({ user }) {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      await axios.post("https://drive-file-manager.onrender.com/api/files/upload", formData, {
+      await axios.post("http://localhost:8080/api/files/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true 
       });
@@ -83,7 +83,7 @@ function DriveApp({ user }) {
 
   const handleDownload = async (file) => {
     try {
-      const response = await axios.get(`https://drive-file-manager.onrender.com/api/files/download/${file.id}`, {
+      const response = await axios.get(`http://localhost:8080/api/files/download/${file.id}`, {
         responseType: 'blob',
         withCredentials: true
       });
@@ -109,9 +109,13 @@ function DriveApp({ user }) {
 
     try {
       if (currentTab === 'trash') {
-        await axios.delete(`https://drive-file-manager.onrender.com/api/files/delete/${id}`, { withCredentials: true });
+        await axios.delete(
+          `http://localhost:8080/api/files/delete/${id}`,
+          { withCredentials: true });
       } else {
-        await axios.put(`https://drive-file-manager.onrender.com/api/files/trash/${id}`, {}, { withCredentials: true });
+        await axios.put(
+          `http://localhost:8080/api/files/trash/${id}`
+          , {}, { withCredentials: true });
       }
       fetchFiles(currentTab);
       setSelectedFiles(selectedFiles.filter(fileId => fileId !== id));
@@ -150,7 +154,9 @@ const handleShare = async () => {
         const fileMeta = files.find(f => f.id === fileId);
         const fileName = fileMeta ? fileMeta.name : `shared_file_${fileId}`;
 
-        const response = await axios.get(`https://drive-file-manager.onrender.com/api/files/download/${fileId}`, {
+        const response = await axios.get(
+          `http://localhost:8080/api/files/download/${fileId}`
+          , {
           responseType: 'blob',
           withCredentials: true
         });

@@ -40,9 +40,9 @@ function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
       <input type="file" ref={hiddenFileInput} onChange={handleChange} style={{ display: "none" }} />
       
       <ul className="nav-links">
-        <li className={currentTab === 'home' ? 'active' : ''} onClick={() => setCurrentTab('home')}>🏠 My Drive</li>
+        <li className={currentTab === 'home' ? 'active' : ''} onClick={() => setCurrentTab('home')}>🏠 Home</li>
         <li className={currentTab === 'recents' ? 'active' : ''} onClick={() => setCurrentTab('recents')}>🕒 Recent</li>
-      <li className={currentTab === 'share' ? 'active' : ''} onClick={() => setCurrentTab('share')}>🔗 My Shared Files</li>
+      <li className={currentTab === 'share' ? 'active' : ''} onClick={() => setCurrentTab('share')}>🔗Shared Files</li>
         <li className={currentTab === 'trash' ? 'active' : ''} onClick={() => setCurrentTab('trash')}>🗑️ Trash</li>
       </ul>
 
