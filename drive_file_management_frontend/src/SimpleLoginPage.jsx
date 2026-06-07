@@ -33,83 +33,55 @@ export default function SimpleLoginPage() {
   };
 
 
-
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
-
+    // Clean the inputs to prevent whitespace errors
+    const safeEmail = email.trim();
+    const safeName = name.trim();
 
     // FRONTEND CHECK: Block disposable fake emails
-
     const fakeDomains = [
-
       "mailinator.com", "10minutemail.com", "guerrillamail.com",
-
       "tempmail.com", "yopmail.com", "dropmail.me"
-
     ];
 
-   
-
-    const emailDomain = email.split('@')[1];
-
-   
+    const emailDomain = safeEmail.split('@')[1];
 
     if (fakeDomains.includes(emailDomain)) {
-
       alert("Please use a real email address (Gmail, Outlook, Yahoo, etc).");
-
       return;
-
     }
-
-
 
     try {
-
       if (isLogin) {
-
-        // LOGIN LOGIC
-
-        const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/login", { email, password });
-
-       
+        // LOGIN LOGIC - use safeEmail
+        const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/login", {
+          email: safeEmail,
+          password
+        });
 
         if (response.status === 200) {
-
           alert("Success: Welcome " + response.data.name + "!");
-
           window.location.href = "/";
-
         }
 
-
-
       } else {
-
-        // SIGNUP LOGIC
-
-        const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/register", { name, email, password });
-
+        // SIGNUP LOGIC - use safeEmail and safeName
+        const response = await axios.post("https://drive-file-manager.onrender.com/api/auth/register", {
+          name: safeName,
+          email: safeEmail,
+          password
+        });
         alert("Success: " + (response.data.message || "Account Created"));
 
-       
-
         setIsLogin(true);
-
         setPassword('');
-
       }
-
     } catch (error) {
-
       console.error("Backend Error:", error);
-
       alert("Error: " + (error.response?.data?.message || "Invalid Credentials"));
-
     }
-
   };
 
 
@@ -162,7 +134,7 @@ export default function SimpleLoginPage() {
 
           )}
 
-         
+
 
           <input
 
@@ -182,7 +154,7 @@ export default function SimpleLoginPage() {
 
           />
 
-         
+
 
           <div className="password-wrapper">
 
@@ -204,7 +176,7 @@ export default function SimpleLoginPage() {
 
             />
 
-           
+
 
             <div
 
@@ -290,7 +262,7 @@ export default function SimpleLoginPage() {
 
           </button>
 
-         
+
 
           <button type="button" onClick={() => handleOAuthLogin('github')} className="btn-oauth btn-github">
 
