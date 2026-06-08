@@ -1,13 +1,15 @@
 import React from "react";
 import "./Header.css";
+import API_URL_TEST from "../jsconfig";
 
 function Header({ onSearch, user }) {
   const handleLogout = () => {
-    window.location.href = "https://drive-file-manager.onrender.com/logout";
+   window.location.href = `${API_URL_TEST}/api/auth/logout`;
   };
 
-  //set user avtar if its not have any avtar
+  // Set user avatar if it doesn't have one
   const avatarUrl = user?.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  
   return (
     <div className="header">
       <div className="search-container">
@@ -18,7 +20,17 @@ function Header({ onSearch, user }) {
         {user && (
           <div className="user-info">
             <span className="user-name">{user.name}</span>
-            <img src={user.avatar} alt="Profile" className="user-avatar" />
+            {/* 🔴 THE FIX IS RIGHT HERE */}
+            <img 
+              src={avatarUrl} 
+              alt="Profile" 
+              className="user-avatar" 
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.target.onerror = null; // Prevents infinite loop
+                e.target.src = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+              }}
+            />
           </div>
         )}
         <button onClick={handleLogout} className="logout-btn">Logout</button>
@@ -26,4 +38,5 @@ function Header({ onSearch, user }) {
     </div>
   );
 }
+
 export default Header;

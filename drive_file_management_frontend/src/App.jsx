@@ -3,8 +3,8 @@ import axios from "axios";
 import DriveApp from "./DriveApp";
 import SimpleLoginPage from "./SimpleLoginPage";
 import Footer from "./Components/Footer";
+import URL_TEST from "./jsconfig"; // Ensure this is imported
 
-// VERY IMPORTANT: API calls mein cookies send ke liye
 axios.defaults.withCredentials = true;
 
 function App() {
@@ -12,7 +12,8 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("https://drive-file-manager.onrender.com/api/auth/me")
+    // FIX: Using the dynamic variable instead of the hardcoded Render URL
+    axios.get(`${URL_TEST}/api/auth/me`)
       .then(response => {
         setUser(response.data);
         setLoading(false);
@@ -28,17 +29,11 @@ function App() {
   }
 
   return (
-
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-
-
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {user ? <DriveApp user={user} /> : <SimpleLoginPage />}
       </div>
-
-
       <Footer />
-
     </div>
   );
 }

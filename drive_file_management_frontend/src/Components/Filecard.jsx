@@ -1,7 +1,8 @@
 import React from "react";
 import "./Filecard.css";
 
-const FileCard = ({ file, onDownload, onDelete, isTrash, isSelected, onToggleSelect }) => {
+// 1. Added onRestore to the props here
+const FileCard = ({ file, onDownload, onDelete, onRestore, isTrash, isSelected, onToggleSelect }) => {
   const getFileIcon = (fileName) => {
     const ext = fileName.split(".").pop().toLowerCase();
     const icons = {
@@ -40,13 +41,42 @@ const FileCard = ({ file, onDownload, onDelete, isTrash, isSelected, onToggleSel
         <img src={getFileIcon(file.name)} alt="icon" className="file-icon" />
         <p className="file-name" title={file.name}>{file.name}</p>
       </div>
+      
       <div className="card-bottom">
         <p className="file-size">{(file.size / 1024).toFixed(2)} KB</p>
-        <button className="action-btn" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
-          {isTrash ? "🗑️ Permanent Delete" : "🗑️ Trash"}
-        </button>
+        
+        {/* 2. Updated Action Buttons Logic */}
+        <div className="card-actions" style={{ display: 'flex', gap: '8px' }}>
+          {isTrash ? (
+            <>
+              {/* Restore Button */}
+              <button 
+                className="action-btn" 
+                onClick={(e) => { e.stopPropagation(); onRestore(); }}
+                style={{ color: '#4CAF50', borderColor: '#4CAF50' }}
+              >
+                ↺ Restore
+              </button>
+              
+              {/* Permanent Delete Button */}
+              <button 
+                className="action-btn" 
+                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                style={{ color: '#f44336', borderColor: '#f44336' }}
+              >
+                🗑️ Delete
+              </button>
+            </>
+          ) : (
+            /* Normal Trash Button */
+            <button className="action-btn" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+              🗑️ Trash
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
 };
+
 export default FileCard;
