@@ -1,21 +1,9 @@
-import React, { useRef, useState, useEffect } from "react";
-import axios from "axios";
-import URL_TEST from "../jsconfig";
+import React, { useRef } from "react";
 import "./Sidebar.css";
 
-function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
+function Sidebar({ onFileSelect, currentTab, setCurrentTab, storageUsed }) {
   const hiddenFileInput = useRef(null);
-  const [storageUsed, setStorageUsed] = useState(0);
- const MAX_STORAGE = 5 * 1024 * 1024 * 1024; // 5 GB
-
-  useEffect(() => {
-    // FIX: Targets specific API metadata controller instead of standard deployment base context URL
-    axios.get(`${URL_TEST}/api/files/storage`)
-      .then((res) => {
-        setStorageUsed(Number(res.data) || 0);
-      })
-      .catch((err) => console.error("Error fetching usage statistics:", err));
-  }, [currentTab]);
+  const MAX_STORAGE = 5 * 1024 * 1024 * 1024; // 5 GB
 
   const handleChange = (event) => {
     if (event.target.files[0]) onFileSelect(event.target.files[0]);
@@ -34,7 +22,7 @@ function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
   return (
     <div className="sidebar">
       <div className="logo-container">
-        <img src="https://cdn-icons-png.flaticon.com/512/9692/9692936.png" className="drive-logo" />
+        <img src="https://cdn-icons-png.flaticon.com/512/9692/9692936.png" className="drive-logo" alt="logo" />
         <span className="logo-text">Drive</span>
       </div>
 
@@ -55,7 +43,7 @@ function Sidebar({ onFileSelect, currentTab, setCurrentTab }) {
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${storagePercentage}%`, background: storagePercentage > 90 ? '#d93025' : '#1a73e8' }}></div>
         </div>
-      <p className="storage-text">{formatBytes(storageUsed)} of 5 GB used</p>
+        <p className="storage-text">{formatBytes(storageUsed)} of 5 GB used</p>
       </div>
     </div>
   );

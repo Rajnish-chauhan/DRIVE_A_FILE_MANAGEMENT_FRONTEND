@@ -111,7 +111,6 @@
   margin-top: 8px; 
 }
 
-/* ---- NAYA: Mobile Responsiveness ---- */
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
@@ -123,22 +122,22 @@
     padding: 0 0 10px 0;
   }
   .new-btn {
-    width: 100%; /* Button ko full width banayenge */
+    width: 100%; 
     justify-content: center;
     margin-bottom: 15px;
   }
   .nav-links {
     display: flex;
-    overflow-x: auto; /* Left-Right scroll enable karega */
-    white-space: nowrap; /* Tabs ko niche girne se rokega */
+    overflow-x: auto; 
+    white-space: nowrap; 
     padding-bottom: 5px;
     gap: 10px;
   }
   .nav-links li {
-    border-radius: 20px; /* Pill shape */
+    border-radius: 20px; 
     margin-bottom: 0;
   }
   .storage-section {
-    display: none; /* Phone par cleaner UI ke liye storage hide kar denge */
+    display: none; 
   }
 }

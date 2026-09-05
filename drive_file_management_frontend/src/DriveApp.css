@@ -11,7 +11,7 @@
   flex-direction: column; 
   background: #fff; 
   border-radius: 15px 0 0 0; 
-  height: 100%; /* Extracted from JS */
+  height: 100%; 
 }
 
 .content-padding { 
@@ -166,7 +166,6 @@
   display: none;
 }
 
-/* ---- Mobile Responsiveness ---- */
 @media (max-width: 768px) {
   .main-layout {
     flex-direction: column; 

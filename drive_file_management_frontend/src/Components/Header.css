@@ -76,23 +76,22 @@
   background: #fce8e6; 
 }
 
-/* ---- NAYA: Mobile Responsiveness ---- */
 @media (max-width: 768px) {
   .header {
     height: auto;
     padding: 10px 15px;
-    flex-wrap: wrap; /* Elements ko next line me bhej dega */
+    flex-wrap: wrap; 
     gap: 10px;
   }
   .search-container {
     max-width: 100%;
     width: 100%;
-    order: 3; /* Search bar ko 3rd position (sabse niche) layega */
+    order: 3; 
   }
   .profile-section, .profile-container {
     gap: 10px;
   }
   .user-name {
-    display: none; /* Phone par naam hide karenge */
+    display: none; 
   }
 }

@@ -1,10 +1,10 @@
 import React from 'react';
-import API_URL_TEST from '../jsconfig';
+import URL_TEST from '../jsconfig';
 import './Footer.css'; 
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-const api=import.meta.env.VITE_API_URL_TEST;
+  
   return (
     <footer className="footer">
       <div className="footer-container">
@@ -12,7 +12,7 @@ const api=import.meta.env.VITE_API_URL_TEST;
         <p className="footer-text">
           &copy; {currentYear}{' '}
           <a 
-            href={API_URL_TEST}
+            href={URL_TEST}
             target="_blank" 
             rel="noopener noreferrer" 
             className="footer-main-link"

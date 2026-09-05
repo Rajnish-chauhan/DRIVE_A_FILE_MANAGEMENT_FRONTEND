@@ -1,17 +1,17 @@
 .footer {
   background: #f8f9fa;
   border-top: 1px solid #dadce0;
-  padding: 20px 15px; /* Thoda padding adjust kiya center look ke liye */
+  padding: 20px 15px; 
   width: 100%;
   margin-top: auto;
 }
 
 .footer-container {
   display: flex;
-  flex-direction: column; /* Ye dono ko upar-neeche kar dega */
-  align-items: center; /* Center me layega */
+  flex-direction: column; 
+  align-items: center; 
   justify-content: center;
-  gap: 12px; /* Text aur links ke beech ka gap */
+  gap: 12px; 
 }
 
 .footer-text {

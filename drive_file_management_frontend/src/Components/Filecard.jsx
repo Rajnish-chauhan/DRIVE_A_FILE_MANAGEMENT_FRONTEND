@@ -1,7 +1,6 @@
 import React from "react";
 import "./Filecard.css";
 
-// 1. Added onRestore to the props here
 const FileCard = ({ file, onDownload, onDelete, onRestore, isTrash, isSelected, onToggleSelect }) => {
   const getFileIcon = (fileName) => {
     const ext = fileName.split(".").pop().toLowerCase();
@@ -25,15 +24,14 @@ const FileCard = ({ file, onDownload, onDelete, onRestore, isTrash, isSelected, 
           onDownload(file.id); 
         }
       }}
-      style={{ position: 'relative' }} // Checkbox ko place karne ke liye
+      style={{ position: 'relative' }}
     >
-     {/* check box for file share */}
       <input 
         type="checkbox" 
         className="file-checkbox"
         checked={isSelected}
         onChange={() => onToggleSelect(file.id)}
-        onClick={(e) => e.stopPropagation()} // Click ko rokne ke liye taaki download trigger na ho
+        onClick={(e) => e.stopPropagation()} 
         style={{ position: 'absolute', top: '10px', left: '10px', cursor: 'pointer', transform: 'scale(1.2)' }}
       />
 
@@ -45,11 +43,9 @@ const FileCard = ({ file, onDownload, onDelete, onRestore, isTrash, isSelected, 
       <div className="card-bottom">
         <p className="file-size">{(file.size / 1024).toFixed(2)} KB</p>
         
-        {/* 2. Updated Action Buttons Logic */}
         <div className="card-actions" style={{ display: 'flex', gap: '8px' }}>
           {isTrash ? (
             <>
-              {/* Restore Button */}
               <button 
                 className="action-btn" 
                 onClick={(e) => { e.stopPropagation(); onRestore(); }}
@@ -58,7 +54,6 @@ const FileCard = ({ file, onDownload, onDelete, onRestore, isTrash, isSelected, 
                 ↺ Restore
               </button>
               
-              {/* Permanent Delete Button */}
               <button 
                 className="action-btn" 
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
@@ -68,7 +63,6 @@ const FileCard = ({ file, onDownload, onDelete, onRestore, isTrash, isSelected, 
               </button>
             </>
           ) : (
-            /* Normal Trash Button */
             <button className="action-btn" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
               🗑️ Trash
             </button>
